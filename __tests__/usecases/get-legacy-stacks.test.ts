@@ -76,19 +76,16 @@ describe('getLegacyStacks', () => {
 
   it('returns true for legacy stacks', async () => {
     await assertStack(development, {isLegacy: true})
-    expect(logger.preview).toHaveBeenNthCalledWith(
-      1,
-      'checking stack development'
-    )
-    expect(logger.preview).toHaveBeenNthCalledWith(
+    expect(logger.log).toHaveBeenNthCalledWith(1, 'checking stack development')
+    expect(logger.log).toHaveBeenNthCalledWith(
       2,
       '  [fail] checked tag [environment=development] against patterns [staging,dev*]'
     )
-    expect(logger.preview).toHaveBeenNthCalledWith(
+    expect(logger.log).toHaveBeenNthCalledWith(
       3,
       '  [fail] checked stack age [2021-01-01T00:00:00.000Z] against timeout [6 hours]'
     )
-    expect(logger.preview).toHaveBeenNthCalledWith(
+    expect(logger.log).toHaveBeenNthCalledWith(
       4,
       '  [result] legacy stack - marking for cleanup'
     )
@@ -96,15 +93,12 @@ describe('getLegacyStacks', () => {
 
   it('returns false for non-legacy stacks', async () => {
     await assertStack(production, {isLegacy: false})
-    expect(logger.preview).toHaveBeenNthCalledWith(
-      1,
-      'checking stack production'
-    )
-    expect(logger.preview).toHaveBeenNthCalledWith(
+    expect(logger.log).toHaveBeenNthCalledWith(1, 'checking stack production')
+    expect(logger.log).toHaveBeenNthCalledWith(
       2,
       '  [pass] checked tag [environment=production] against patterns [staging,dev*]'
     )
-    expect(logger.preview).toHaveBeenNthCalledWith(
+    expect(logger.log).toHaveBeenNthCalledWith(
       3,
       '  [result] not a legacy stack - skipping'
     )

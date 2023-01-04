@@ -14,12 +14,13 @@ export const getInputs = ({getInput}: ActionsCore): Inputs => {
   const tags = parseTags(getInput('legacy-tags'))
   const preview = getInput('preview') === 'true'
   const timeoutHours = parseInt(getInput('timeout-hours'), 10)
+  const verbose = getInput('verbose') === 'true'
 
   return {
     options: {
       preview,
       workDir,
-      logger: createLogger(preview)
+      logger: createLogger({preview, verbose})
     },
     legacyStackSpec: {
       tags,

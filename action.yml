@@ -17,6 +17,9 @@ inputs:
   preview:
     required: false
     description: When set to true, logs what what the action would do but doesn\'t destroy and stacks
+  verbose:
+    required: false
+    description: Outputs detailed logs regarding the checks for each stack
 runs:
   using: 'node16'
   main: 'dist/index.js'
