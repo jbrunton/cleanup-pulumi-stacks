@@ -22,11 +22,12 @@ const getInputs = ({ getInput }) => {
     const tags = parseTags(getInput('legacy-tags'));
     const preview = getInput('preview') === 'true';
     const timeoutHours = parseInt(getInput('timeout-hours'), 10);
+    const verbose = getInput('verbose') === 'true';
     return {
         options: {
             preview,
             workDir,
-            logger: (0, logger_1.createLogger)(preview)
+            logger: (0, logger_1.createLogger)({ preview, verbose })
         },
         legacyStackSpec: {
             tags,
@@ -86,11 +87,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createLogger = void 0;
 const core = __importStar(__nccwpck_require__(42186));
-const createLogger = (preview) => ({
+const createLogger = ({ preview, verbose }) => ({
     info: preview
         ? (message) => core.info(`[PREVIEW] ${message}`)
         : core.info,
-    preview: preview ? core.info : () => { }
+    log: verbose ? core.info : () => { }
 });
 exports.createLogger = createLogger;
 
@@ -359,27 +360,27 @@ const hasLegacyTags = (tagValues, tags, logger) => {
     return tags.some(tagSpec => {
         const value = tagValues[tagSpec.tag];
         const isLegacy = value ? micromatch_1.default.isMatch(value, tagSpec.patterns) : false;
-        logger.preview(`  ${checkResultString(isLegacy)} checked tag [${tagSpec.tag}=${value}] against patterns [${tagSpec.patterns}]`);
+        logger.log(`  ${checkResultString(isLegacy)} checked tag [${tagSpec.tag}=${value}] against patterns [${tagSpec.patterns}]`);
         return isLegacy;
     });
 };
 const isLegacyStack = (stack, { tags, timeoutHours }, { workDir, logger }) => __awaiter(void 0, void 0, void 0, function* () {
-    logger.preview(`checking stack ${stack.name}`);
+    logger.log(`checking stack ${stack.name}`);
     const tagValues = yield getTagValues(stack.name, workDir, tags);
     const legacyTags = hasLegacyTags(tagValues, tags, logger);
     if (!legacyTags) {
-        logger.preview('  [result] not a legacy stack - skipping');
+        logger.log('  [result] not a legacy stack - skipping');
         return false;
     }
     const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null;
     const timeoutAge = (0, date_fns_1.subHours)(new Date(), timeoutHours);
     const reachedTimeout = stackAge ? stackAge < timeoutAge : false;
-    logger.preview(`  ${checkResultString(reachedTimeout)} checked stack age [${stackAge === null || stackAge === void 0 ? void 0 : stackAge.toISOString()}] against timeout [${timeoutHours} hours]`);
+    logger.log(`  ${checkResultString(reachedTimeout)} checked stack age [${stackAge === null || stackAge === void 0 ? void 0 : stackAge.toISOString()}] against timeout [${timeoutHours} hours]`);
     if (!reachedTimeout) {
-        logger.preview('  [result] not a legacy stack - skipping');
+        logger.log('  [result] not a legacy stack - skipping');
         return false;
     }
-    logger.preview('  [result] legacy stack - marking for cleanup');
+    logger.log('  [result] legacy stack - marking for cleanup');
     return true;
 });
 exports.isLegacyStack = isLegacyStack;

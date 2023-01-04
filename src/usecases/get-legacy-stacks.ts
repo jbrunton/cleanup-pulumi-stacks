@@ -20,7 +20,7 @@ export type LegacyStackSpec = {
 
 export type Logger = {
   info: (message: string) => void
-  preview: (message: string) => void
+  log: (message: string) => void
 }
 
 export type Options = {
@@ -71,7 +71,7 @@ const hasLegacyTags = (
   return tags.some(tagSpec => {
     const value = tagValues[tagSpec.tag]
     const isLegacy = value ? micromatch.isMatch(value, tagSpec.patterns) : false
-    logger.preview(
+    logger.log(
       `  ${checkResultString(isLegacy)} checked tag [${
         tagSpec.tag
       }=${value}] against patterns [${tagSpec.patterns}]`
@@ -85,28 +85,28 @@ export const isLegacyStack = async (
   {tags, timeoutHours}: LegacyStackSpec,
   {workDir, logger}: Options
 ): Promise<boolean> => {
-  logger.preview(`checking stack ${stack.name}`)
+  logger.log(`checking stack ${stack.name}`)
 
   const tagValues = await getTagValues(stack.name, workDir, tags)
   const legacyTags = hasLegacyTags(tagValues, tags, logger)
   if (!legacyTags) {
-    logger.preview('  [result] not a legacy stack - skipping')
+    logger.log('  [result] not a legacy stack - skipping')
     return false
   }
 
   const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null
   const timeoutAge = subHours(new Date(), timeoutHours)
   const reachedTimeout = stackAge ? stackAge < timeoutAge : false
-  logger.preview(
+  logger.log(
     `  ${checkResultString(
       reachedTimeout
     )} checked stack age [${stackAge?.toISOString()}] against timeout [${timeoutHours} hours]`
   )
   if (!reachedTimeout) {
-    logger.preview('  [result] not a legacy stack - skipping')
+    logger.log('  [result] not a legacy stack - skipping')
     return false
   }
 
-  logger.preview('  [result] legacy stack - marking for cleanup')
+  logger.log('  [result] legacy stack - marking for cleanup')
   return true
 }
