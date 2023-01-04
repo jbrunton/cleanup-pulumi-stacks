@@ -89,7 +89,7 @@ const core = __importStar(__nccwpck_require__(42186));
 const createLogger = (preview) => ({
     info: preview
         ? (message) => core.info(`[PREVIEW] ${message}`)
-        : () => { },
+        : core.info,
     preview: preview ? core.info : () => { }
 });
 exports.createLogger = createLogger;
