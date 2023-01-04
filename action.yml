@@ -2,10 +2,21 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  milliseconds: # change this
+  project:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: Pulumi project to check
+  working-directory:
+    description: Working directory of your Pulumi project
+    default: '.'
+  legacy-tags:
+    required: true
+    description: Tags spec to check for legacy stacks
+  timeout-hours:
+    required: true
+    description: The number of hours since the last update after which a stack should be destroyed
+  preview:
+    required: false
+    description: When set to true, logs what what the action would do but doesn\'t destroy and stacks
 runs:
   using: 'node16'
   main: 'dist/index.js'
