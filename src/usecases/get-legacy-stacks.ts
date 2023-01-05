@@ -1,7 +1,7 @@
+import {StackAgeCheck} from './checks/stack-age-check'
 import {StackSummary} from '@pulumi/pulumi/automation'
+import {TagCheck} from './checks/tag-check'
 import {getTagValue} from '../cmd'
-import micromatch from 'micromatch'
-import {subHours} from 'date-fns'
 
 export type LegacyStack = {
   name: string
@@ -60,26 +60,6 @@ const getTagValues = async (
   return Object.fromEntries(tagValues)
 }
 
-const checkResultString = (isLegacy: boolean): string =>
-  isLegacy ? '[fail]' : '[pass]'
-
-const hasLegacyTags = (
-  tagValues: Record<string, string>,
-  tags: TagSpec[],
-  logger: Logger
-): boolean => {
-  return tags.some(tagSpec => {
-    const value = tagValues[tagSpec.tag]
-    const isLegacy = value ? micromatch.isMatch(value, tagSpec.patterns) : false
-    logger.log(
-      `  ${checkResultString(isLegacy)} checked tag [${
-        tagSpec.tag
-      }=${value}] against patterns [${tagSpec.patterns}]`
-    )
-    return isLegacy
-  })
-}
-
 export const isLegacyStack = async (
   stack: StackSummary,
   {tags, timeoutHours}: LegacyStackSpec,
@@ -88,23 +68,19 @@ export const isLegacyStack = async (
   logger.log(`checking stack ${stack.name}`)
 
   const tagValues = await getTagValues(stack.name, workDir, tags)
-  const legacyTags = hasLegacyTags(tagValues, tags, logger)
-  if (!legacyTags) {
-    logger.log('  [result] not a legacy stack - skipping')
-    return false
-  }
 
-  const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null
-  const timeoutAge = subHours(new Date(), timeoutHours)
-  const reachedTimeout = stackAge ? stackAge < timeoutAge : false
-  logger.log(
-    `  ${checkResultString(
-      reachedTimeout
-    )} checked stack age [${stackAge?.toISOString()}] against timeout [${timeoutHours} hours]`
-  )
-  if (!reachedTimeout) {
-    logger.log('  [result] not a legacy stack - skipping')
-    return false
+  const checks = [
+    ...tags.map(tag => TagCheck(tag, tagValues)),
+    StackAgeCheck(stack, timeoutHours)
+  ]
+
+  for (const check of checks) {
+    const {isLegacy, description} = check()
+    logger.log(`  ${isLegacy ? '[fail]' : '[pass]'} ${description}`)
+    if (!isLegacy) {
+      logger.log('  [result] not a legacy stack - skipping')
+      return false
+    }
   }
 
   logger.log('  [result] legacy stack - marking for cleanup')
