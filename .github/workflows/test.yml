@@ -1,4 +1,5 @@
 name: 'build-test'
+concurrency: ${{ github.head_ref }}
 on: # rebuild any PRs and main branch changes
   pull_request:
   push:
@@ -15,10 +16,64 @@ jobs:
           npm install
       - run: |
           npm run all
-  # test: # make sure the action works on a clean machine without building
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: ./
-  #       with:
-  #         milliseconds: 1000
+
+  test: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
+      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TEST_NAME: ${{ github.head_ref }}
+      DEV_TAG: dev-${{ github.head_ref }}-1
+      PROD_TAG: prod-${{ github.head_ref }}-1
+      DEV_STACK_NAME: ${{ github.head_ref }}-dev
+      PROD_STACK_NAME: ${{ github.head_ref }}-prod
+    steps:
+      - uses: actions/checkout@v2
+      - run: npm ci
+        working-directory: pulumi
+      - name: create dev stack
+        uses: pulumi/actions@v3
+        with:
+          command: up
+          stack-name: ${{ env.DEV_STACK_NAME }}
+          upsert: true
+          work-dir: pulumi
+        env:
+          ENVIRONMENT_TAG: ${{ env.DEV_TAG }}
+      - name: create prod stack
+        uses: pulumi/actions@v3
+        with:
+          command: up
+          stack-name: ${{ env.PROD_STACK_NAME }}
+          upsert: true
+          work-dir: pulumi
+        env:
+          ENVIRONMENT_TAG: ${{ env.PROD_TAG }}
+      - name: assert both stacks
+        run: EXPECTED_STACKS=$DEV_STACK_NAME,$PROD_STACK_NAME npx ts-node assert-stacks
+        working-directory: pulumi
+      - name: 'test: cleanup dev stack'
+        uses: ./
+        with:
+          project: jbrunton/test-cleanup-pulumi-stacks
+          working-directory: pulumi
+          legacy-tags: 'environment: dev-${{ github.head_ref }}*'
+          timeout-hours: 0
+          verbose: true
+      - name: assert prod stack only
+        run: EXPECTED_STACKS=$PROD_STACK_NAME npx ts-node assert-stacks
+        working-directory: pulumi
+      - name: 'test: cleanup prod stack'
+        uses: ./
+        with:
+          project: jbrunton/test-cleanup-pulumi-stacks
+          working-directory: pulumi
+          legacy-tags: 'environment: prod-${{ github.head_ref }}*'
+          timeout-hours: 0
+          verbose: true
+      - name: assert zero stacks
+        run: EXPECTED_STACKS= npx ts-node assert-stacks
+        working-directory: pulumi
