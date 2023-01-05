@@ -1,0 +1,3 @@
+name: test-cleanup-pulumi-stacks
+description: Project to test cleanup-pulumi-stacks GitHub action
+runtime: nodejs
