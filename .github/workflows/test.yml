@@ -1,6 +1,10 @@
 name: 'build-test'
-concurrency: ${{ github.head_ref }}
-on: # rebuild any PRs and main branch changes
+
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+on:
   pull_request:
   push:
     branches:
@@ -8,7 +12,7 @@ on: # rebuild any PRs and main branch changes
       - 'releases/*'
 
 jobs:
-  build: # make sure build/ci work properly
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,7 +21,7 @@ jobs:
       - run: |
           npm run all
 
-  test: # make sure the action works on a clean machine without building
+  test:
     runs-on: ubuntu-latest
     env:
       AWS_REGION: us-east-1
@@ -25,15 +29,17 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}      
       PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TEST_NAME: ${{ github.head_ref }}
-      DEV_TAG: dev-${{ github.head_ref }}-1
-      PROD_TAG: prod-${{ github.head_ref }}-1
-      DEV_STACK_NAME: ${{ github.head_ref }}-dev
-      PROD_STACK_NAME: ${{ github.head_ref }}-prod
+      TEST_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v3
       - run: npm ci
         working-directory: pulumi
+      - name: configure env
+        run: |
+          echo "DEV_TAG=dev-$TEST_NAME-1" >> $GITHUB_ENV
+          echo "PROD_TAG=prod-$TEST_NAME-1" >> $GITHUB_ENV
+          echo "DEV_STACK_NAME=$TEST_NAME-dev" >> $GITHUB_ENV
+          echo "PROD_STACK_NAME=$TEST_NAME-prod" >> $GITHUB_ENV
       - name: create dev stack
         uses: pulumi/actions@v3
         with:
@@ -60,7 +66,7 @@ jobs:
         with:
           project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
-          legacy-tags: 'environment: dev-${{ github.head_ref }}*'
+          legacy-tags: 'environment: dev-${{ env.TEST_NAME }}*'
           timeout-hours: 0
           verbose: true
       - name: assert prod stack only
@@ -71,7 +77,7 @@ jobs:
         with:
           project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
-          legacy-tags: 'environment: prod-${{ github.head_ref }}*'
+          legacy-tags: 'environment: prod-${{ env.TEST_NAME }}*'
           timeout-hours: 0
           verbose: true
       - name: assert zero stacks
