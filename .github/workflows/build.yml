@@ -58,24 +58,30 @@ jobs:
       - name: assert both stacks
         run: EXPECTED_STACKS=$DEV_STACK_NAME,$PROD_STACK_NAME npx ts-node assert-stacks
         working-directory: pulumi
-      - name: 'test: cleanup dev stack'
+      - name: 'test: cleanup dev stack [tags policy, config input]'
         uses: ./
         with:
           project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
-          legacy-tags: 'environment: dev-${{ env.TEST_NAME }}*'
-          timeout-hours: 0
+          config: |
+            dev:
+              match:
+                tags:
+                  environment: 'dev-${{ env.TEST_NAME }}*'
+              ttl:
+                hours: 0
           verbose: true
       - name: assert prod stack only
         run: EXPECTED_STACKS=$PROD_STACK_NAME npx ts-node assert-stacks
         working-directory: pulumi
-      - name: 'test: cleanup prod stack'
+      - name: setup config file
+        run: envsubst < cleanup-prod-config.yml > cleanup-config.yml
+        working-directory: pulumi
+      - name: 'test: cleanup prod stack [tags policy, default config_file input]'
         uses: ./
         with:
           project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
-          legacy-tags: 'environment: prod-${{ env.TEST_NAME }}*'
-          timeout-hours: 0
           verbose: true
       - name: assert zero stacks
         run: EXPECTED_STACKS= npx ts-node assert-stacks
