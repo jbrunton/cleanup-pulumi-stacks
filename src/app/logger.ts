@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {Logger} from '@usecases/get-legacy-stacks'
+import {Logger} from '@usecases/check-legacy-stack'
 
 export type LoggerParams = {
   preview: boolean

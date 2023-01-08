@@ -1,10 +1,10 @@
 import {
-  LegacyStack,
+  CheckLegacyStack,
+  LegacyResult,
   LegacyStackSpec,
-  Options,
-  getLegacyStacks
-} from './get-legacy-stacks'
-import {StackSummary} from '@pulumi/pulumi/automation'
+  Options
+} from './check-legacy-stack'
+import {Stack} from '@entities/pulumi'
 
 export interface StackCleaner {
   destroyStack(stackName: string): Promise<void>
@@ -12,14 +12,23 @@ export interface StackCleaner {
 }
 
 export const cleanupLegacyStacks = async (
-  stacks: StackSummary[],
+  stacks: Stack[],
   cleaner: StackCleaner,
   legacySpec: LegacyStackSpec,
   options: Options
 ): Promise<void> => {
   const {logger} = options
 
-  const legacyStacks = await getLegacyStacks(stacks, legacySpec, options)
+  const check = CheckLegacyStack(legacySpec, logger)
+  const legacyStacks: LegacyResult[] = []
+
+  for (const stack of stacks) {
+    const result = await check(stack)
+    if (result.isLegacy) {
+      legacyStacks.push(result)
+    }
+  }
+
   logger.info(
     `Found ${legacyStacks.length} legacy dev stack(s) out of ${stacks.length} total`
   )
@@ -27,7 +36,7 @@ export const cleanupLegacyStacks = async (
   const cleanupStack = async ({
     name,
     requireDestroy
-  }: LegacyStack): Promise<void> => {
+  }: LegacyResult): Promise<void> => {
     if (requireDestroy) {
       await cleaner.destroyStack(name)
       logger.info(`Destroyed legacy stack: ${name}`)
