@@ -1,6 +1,6 @@
+import {CheckResult} from './check'
 import {StackSummary} from '@pulumi/pulumi/automation'
 import {subHours} from 'date-fns'
-import {CheckResult} from './check'
 
 export const StackAgeCheck = (
   stack: StackSummary,

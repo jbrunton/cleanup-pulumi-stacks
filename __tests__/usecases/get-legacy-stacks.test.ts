@@ -1,14 +1,10 @@
 import {StackSummary} from '@pulumi/pulumi/automation'
 import {mock} from 'jest-mock-extended'
-import {
-  isLegacyStack,
-  Logger,
-  TagSpec
-} from '../../src/domain/usecases/get-legacy-stacks'
-import * as pulumi from '../../src/app/adapters/pulumi'
+import {isLegacyStack, Logger, TagSpec} from '@usecases/get-legacy-stacks'
+import * as pulumi from '@app/adapters/pulumi'
 import {subHours} from 'date-fns'
 
-jest.mock('../../src/app/adapters/pulumi')
+jest.mock('@app/adapters/pulumi')
 
 const getTagValue = jest.mocked(pulumi.getTagValue)
 
