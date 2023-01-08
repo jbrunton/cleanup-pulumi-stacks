@@ -1,5 +1,9 @@
 import * as core from '@actions/core'
-import {LegacyStackSpec, Options, TagSpec} from '../usecases/get-legacy-stacks'
+import {
+  LegacyStackSpec,
+  Options,
+  TagSpec
+} from '../domain/usecases/get-legacy-stacks'
 import {createLogger} from './logger'
 
 export type Inputs = {

@@ -1,7 +1,7 @@
 import {StackAgeCheck} from './checks/stack-age-check'
 import {StackSummary} from '@pulumi/pulumi/automation'
 import {TagCheck} from './checks/tag-check'
-import {getTagValue} from '../cmd'
+import {getTagValue} from '../../app/adapters/pulumi'
 
 export type LegacyStack = {
   name: string

@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import {cleanupLegacyStacks} from './cleaner'
+import {cleanupLegacyStacks} from './app/usecases/cleanup-legacy-stacks'
 import {getInputs} from './app/inputs'
 
 async function run(): Promise<void> {

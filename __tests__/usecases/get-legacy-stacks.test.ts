@@ -4,13 +4,13 @@ import {
   isLegacyStack,
   Logger,
   TagSpec
-} from '../../src/usecases/get-legacy-stacks'
-import * as cmd from '../../src/cmd'
+} from '../../src/domain/usecases/get-legacy-stacks'
+import * as pulumi from '../../src/app/adapters/pulumi'
 import {subHours} from 'date-fns'
 
-jest.mock('../../src/cmd')
+jest.mock('../../src/app/adapters/pulumi')
 
-const getTagValue = jest.mocked(cmd.getTagValue)
+const getTagValue = jest.mocked(pulumi.getTagValue)
 
 describe('getLegacyStacks', () => {
   const logger = mock<Logger>()
