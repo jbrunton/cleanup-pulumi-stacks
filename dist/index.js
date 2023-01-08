@@ -9,192 +9,7 @@ module.exports = {"i8":"1.3.8"};
 
 /***/ }),
 
-/***/ 87662:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.exec = void 0;
-const process = __importStar(__nccwpck_require__(63129));
-const exec = (cmd) => {
-    return new Promise((resolve, reject) => {
-        process.exec(cmd, (error, stdout) => {
-            if (error) {
-                reject(error);
-            }
-            resolve(stdout);
-        });
-    });
-};
-exports.exec = exec;
-
-
-/***/ }),
-
-/***/ 58501:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTagValue = void 0;
-const cmd = __importStar(__nccwpck_require__(87662));
-const getTagValue = (stackName, tag, workDir) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    try {
-        const value = yield cmd.exec(`pulumi stack tag get ${tag} --stack ${stackName} --cwd ${workDir}`);
-        return value.trim();
-    }
-    catch (e) {
-        if ((_a = e.message) === null || _a === void 0 ? void 0 : _a.includes(`stack tag '${tag}' not found`)) {
-            return null;
-        }
-        throw e;
-    }
-});
-exports.getTagValue = getTagValue;
-
-
-/***/ }),
-
-/***/ 31385:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getInputs = void 0;
-const logger_1 = __nccwpck_require__(44185);
-const getInputs = ({ getInput }) => {
-    const workDir = getInput('working-directory');
-    const tags = parseTags(getInput('legacy-tags'));
-    const preview = getInput('preview') === 'true';
-    const timeoutHours = parseInt(getInput('timeout-hours'), 10);
-    const verbose = getInput('verbose') === 'true';
-    return {
-        options: {
-            preview,
-            workDir,
-            logger: (0, logger_1.createLogger)({ preview, verbose })
-        },
-        legacyStackSpec: {
-            tags,
-            timeoutHours
-        }
-    };
-};
-exports.getInputs = getInputs;
-const parseTags = (tagsInput) => {
-    const lines = split(tagsInput, '\n');
-    return lines
-        .filter(line => line.length)
-        .map(line => {
-        const [tag, rest] = split(line, ':');
-        if (!rest) {
-            throw new Error(`Error parsing tag spec: ${line}`);
-        }
-        const patterns = split(rest, ',');
-        if (!patterns.length) {
-            throw new Error(`Error parsing tag spec: ${line}`);
-        }
-        return {
-            tag,
-            patterns
-        };
-    });
-};
-const split = (string, separator) => string.split(separator).map(s => s.trim());
-
-
-/***/ }),
-
-/***/ 44185:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createLogger = void 0;
-const core = __importStar(__nccwpck_require__(42186));
-const createLogger = ({ preview, verbose }) => ({
-    info: preview
-        ? (message) => core.info(`[PREVIEW] ${message}`)
-        : core.info,
-    log: verbose ? core.info : () => { }
-});
-exports.createLogger = createLogger;
-
-
-/***/ }),
-
-/***/ 6103:
+/***/ 92647:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -229,8 +44,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanupLegacyStacks = void 0;
+const usecases = __importStar(__nccwpck_require__(2637));
 const automation_1 = __nccwpck_require__(34925);
-const usecases = __importStar(__nccwpck_require__(93408));
 const cleanupLegacyStacks = (options, legacySpec) => __awaiter(void 0, void 0, void 0, function* () {
     const { workDir } = options;
     const workspace = yield automation_1.LocalWorkspace.create({ workDir });
@@ -243,10 +58,14 @@ const cleanupLegacyStacks = (options, legacySpec) => __awaiter(void 0, void 0, v
 exports.cleanupLegacyStacks = cleanupLegacyStacks;
 class PreviewStackCleaner {
     destroyStack() {
-        return Promise.resolve();
+        return __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve();
+        });
     }
     removeStack() {
-        return Promise.resolve();
+        return __awaiter(this, void 0, void 0, function* () {
+            return Promise.resolve();
+        });
     }
 }
 class StackCleaner {
@@ -273,158 +92,7 @@ class StackCleaner {
 
 /***/ }),
 
-/***/ 59556:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StackAgeCheck = void 0;
-const date_fns_1 = __nccwpck_require__(73314);
-const StackAgeCheck = (stack, timeoutHours) => {
-    return () => {
-        const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null;
-        const timeoutAge = (0, date_fns_1.subHours)(new Date(), timeoutHours);
-        const isLegacy = stackAge ? stackAge < timeoutAge : false;
-        const description = `checked stack age [${stackAge === null || stackAge === void 0 ? void 0 : stackAge.toISOString()}] against timeout [${timeoutHours} hours]`;
-        return {
-            isLegacy,
-            description
-        };
-    };
-};
-exports.StackAgeCheck = StackAgeCheck;
-
-
-/***/ }),
-
-/***/ 93135:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TagCheck = void 0;
-const micromatch_1 = __importDefault(__nccwpck_require__(76228));
-const TagCheck = (tagSpec, tagValues) => {
-    return () => {
-        const value = tagValues[tagSpec.tag];
-        const isLegacy = value ? micromatch_1.default.isMatch(value, tagSpec.patterns) : false;
-        const description = `checked tag [${tagSpec.tag}=${value}] against patterns [${tagSpec.patterns}]`;
-        return {
-            isLegacy,
-            description
-        };
-    };
-};
-exports.TagCheck = TagCheck;
-
-
-/***/ }),
-
-/***/ 93408:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.cleanupLegacyStacks = void 0;
-const get_legacy_stacks_1 = __nccwpck_require__(35769);
-const cleanupLegacyStacks = (stacks, cleaner, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
-    const { logger } = options;
-    const legacyStacks = yield (0, get_legacy_stacks_1.getLegacyStacks)(stacks, legacySpec, options);
-    logger.info(`Found ${legacyStacks.length} legacy dev stack(s) out of ${stacks.length} total`);
-    const cleanupStack = ({ name, requireDestroy }) => __awaiter(void 0, void 0, void 0, function* () {
-        if (requireDestroy) {
-            yield cleaner.destroyStack(name);
-            logger.info(`Destroyed legacy stack: ${name}`);
-        }
-        yield cleaner.removeStack(name);
-        logger.info(`Removed legacy stack: ${name}`);
-    });
-    yield Promise.all(legacyStacks.map(cleanupStack));
-    logger.info(`Removed ${legacyStacks.length} legacy stacks, ${stacks.length - legacyStacks.length} remaining`);
-});
-exports.cleanupLegacyStacks = cleanupLegacyStacks;
-
-
-/***/ }),
-
-/***/ 35769:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isLegacyStack = exports.getLegacyStacks = void 0;
-const stack_age_check_1 = __nccwpck_require__(59556);
-const tag_check_1 = __nccwpck_require__(93135);
-const pulumi_1 = __nccwpck_require__(58501);
-const getLegacyStacks = (stacks, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
-    const legacyStacks = [];
-    for (const stack of stacks) {
-        if (yield (0, exports.isLegacyStack)(stack, legacySpec, options)) {
-            legacyStacks.push(stack);
-        }
-    }
-    return legacyStacks.map(({ name, resourceCount }) => ({
-        name,
-        requireDestroy: !!resourceCount
-    }));
-});
-exports.getLegacyStacks = getLegacyStacks;
-const getTagValues = (stackName, workDir, tags) => __awaiter(void 0, void 0, void 0, function* () {
-    const tagValues = yield Promise.all(tags.map((tagSpec) => __awaiter(void 0, void 0, void 0, function* () {
-        const value = yield (0, pulumi_1.getTagValue)(stackName, tagSpec.tag, workDir);
-        return [tagSpec.tag, value];
-    })));
-    return Object.fromEntries(tagValues);
-});
-const isLegacyStack = (stack, { tags, timeoutHours }, { workDir, logger }) => __awaiter(void 0, void 0, void 0, function* () {
-    logger.log(`checking stack ${stack.name}`);
-    const tagValues = yield getTagValues(stack.name, workDir, tags);
-    const checks = [
-        ...tags.map(tag => (0, tag_check_1.TagCheck)(tag, tagValues)),
-        (0, stack_age_check_1.StackAgeCheck)(stack, timeoutHours)
-    ];
-    for (const check of checks) {
-        const { isLegacy, description } = check();
-        logger.log(`  ${isLegacy ? '[fail]' : '[pass]'} ${description}`);
-        if (!isLegacy) {
-            logger.log('  [result] not a legacy stack - skipping');
-            return false;
-        }
-    }
-    logger.log('  [result] legacy stack - marking for cleanup');
-    return true;
-});
-exports.isLegacyStack = isLegacyStack;
-
-
-/***/ }),
-
-/***/ 3109:
+/***/ 9536:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -459,8 +127,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(42186));
-const cleanup_legacy_stacks_1 = __nccwpck_require__(6103);
-const inputs_1 = __nccwpck_require__(31385);
+const cleanup_legacy_stacks_1 = __nccwpck_require__(92647);
+const inputs_1 = __nccwpck_require__(93246);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -77472,6 +77140,351 @@ which.sync = whichSync
 
 /***/ }),
 
+/***/ 56791:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.exec = void 0;
+const process = __importStar(__nccwpck_require__(63129));
+const exec = (cmd) => __awaiter(void 0, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => {
+        process.exec(cmd, (error, stdout) => {
+            if (error) {
+                reject(error);
+            }
+            resolve(stdout);
+        });
+    });
+});
+exports.exec = exec;
+
+
+/***/ }),
+
+/***/ 91902:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getTagValue = void 0;
+const cmd = __importStar(__nccwpck_require__(56791));
+const getTagValue = (stackName, tag, workDir) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const value = yield cmd.exec(`pulumi stack tag get ${tag} --stack ${stackName} --cwd ${workDir}`);
+        return value.trim();
+    }
+    catch (e) {
+        if ((_a = e.message) === null || _a === void 0 ? void 0 : _a.includes(`stack tag '${tag}' not found`)) {
+            return null;
+        }
+        throw e;
+    }
+});
+exports.getTagValue = getTagValue;
+
+
+/***/ }),
+
+/***/ 93246:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getInputs = void 0;
+const logger_1 = __nccwpck_require__(35719);
+const getInputs = ({ getInput }) => {
+    const workDir = getInput('working-directory');
+    const tags = parseTags(getInput('legacy-tags'));
+    const preview = getInput('preview') === 'true';
+    const timeoutHours = parseInt(getInput('timeout-hours'), 10);
+    const verbose = getInput('verbose') === 'true';
+    return {
+        options: {
+            preview,
+            workDir,
+            logger: (0, logger_1.createLogger)({ preview, verbose })
+        },
+        legacyStackSpec: {
+            tags,
+            timeoutHours
+        }
+    };
+};
+exports.getInputs = getInputs;
+const parseTags = (tagsInput) => {
+    const lines = split(tagsInput, '\n');
+    return lines
+        .filter(line => line.length)
+        .map(line => {
+        const [tag, rest] = split(line, ':');
+        if (!rest) {
+            throw new Error(`Error parsing tag spec: ${line}`);
+        }
+        const patterns = split(rest, ',');
+        if (!patterns.length) {
+            throw new Error(`Error parsing tag spec: ${line}`);
+        }
+        return {
+            tag,
+            patterns
+        };
+    });
+};
+const split = (string, separator) => string.split(separator).map(s => s.trim());
+
+
+/***/ }),
+
+/***/ 35719:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createLogger = void 0;
+const core = __importStar(__nccwpck_require__(42186));
+const createLogger = ({ preview, verbose }) => ({
+    info: preview
+        ? (message) => core.info(`[PREVIEW] ${message}`)
+        : core.info,
+    log: verbose ? core.info : () => { }
+});
+exports.createLogger = createLogger;
+
+
+/***/ }),
+
+/***/ 38899:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StackAgeCheck = void 0;
+const date_fns_1 = __nccwpck_require__(73314);
+const StackAgeCheck = (stack, timeoutHours) => {
+    return () => {
+        const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null;
+        const timeoutAge = (0, date_fns_1.subHours)(new Date(), timeoutHours);
+        const isLegacy = stackAge ? stackAge < timeoutAge : false;
+        const description = `checked stack age [${stackAge === null || stackAge === void 0 ? void 0 : stackAge.toISOString()}] against timeout [${timeoutHours} hours]`;
+        return {
+            isLegacy,
+            description
+        };
+    };
+};
+exports.StackAgeCheck = StackAgeCheck;
+
+
+/***/ }),
+
+/***/ 21477:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TagCheck = void 0;
+const micromatch_1 = __importDefault(__nccwpck_require__(76228));
+const TagCheck = (tagSpec, tagValues) => {
+    return () => {
+        const value = tagValues[tagSpec.tag];
+        const isLegacy = value ? micromatch_1.default.isMatch(value, tagSpec.patterns) : false;
+        const description = `checked tag [${tagSpec.tag}=${value}] against patterns [${tagSpec.patterns}]`;
+        return {
+            isLegacy,
+            description
+        };
+    };
+};
+exports.TagCheck = TagCheck;
+
+
+/***/ }),
+
+/***/ 2637:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.cleanupLegacyStacks = void 0;
+const get_legacy_stacks_1 = __nccwpck_require__(6198);
+const cleanupLegacyStacks = (stacks, cleaner, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
+    const { logger } = options;
+    const legacyStacks = yield (0, get_legacy_stacks_1.getLegacyStacks)(stacks, legacySpec, options);
+    logger.info(`Found ${legacyStacks.length} legacy dev stack(s) out of ${stacks.length} total`);
+    const cleanupStack = ({ name, requireDestroy }) => __awaiter(void 0, void 0, void 0, function* () {
+        if (requireDestroy) {
+            yield cleaner.destroyStack(name);
+            logger.info(`Destroyed legacy stack: ${name}`);
+        }
+        yield cleaner.removeStack(name);
+        logger.info(`Removed legacy stack: ${name}`);
+    });
+    yield Promise.all(legacyStacks.map(cleanupStack));
+    logger.info(`Removed ${legacyStacks.length} legacy stacks, ${stacks.length - legacyStacks.length} remaining`);
+});
+exports.cleanupLegacyStacks = cleanupLegacyStacks;
+
+
+/***/ }),
+
+/***/ 6198:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isLegacyStack = exports.getLegacyStacks = void 0;
+const stack_age_check_1 = __nccwpck_require__(38899);
+const tag_check_1 = __nccwpck_require__(21477);
+const pulumi_1 = __nccwpck_require__(91902);
+const getLegacyStacks = (stacks, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
+    const legacyStacks = [];
+    for (const stack of stacks) {
+        if (yield (0, exports.isLegacyStack)(stack, legacySpec, options)) {
+            legacyStacks.push(stack);
+        }
+    }
+    return legacyStacks.map(({ name, resourceCount }) => ({
+        name,
+        requireDestroy: !!resourceCount
+    }));
+});
+exports.getLegacyStacks = getLegacyStacks;
+const getTagValues = (stackName, workDir, tags) => __awaiter(void 0, void 0, void 0, function* () {
+    const tagValues = yield Promise.all(tags.map((tagSpec) => __awaiter(void 0, void 0, void 0, function* () {
+        const value = yield (0, pulumi_1.getTagValue)(stackName, tagSpec.tag, workDir);
+        return [tagSpec.tag, value];
+    })));
+    return Object.fromEntries(tagValues);
+});
+const isLegacyStack = (stack, { tags, timeoutHours }, { workDir, logger }) => __awaiter(void 0, void 0, void 0, function* () {
+    logger.log(`checking stack ${stack.name}`);
+    const tagValues = yield getTagValues(stack.name, workDir, tags);
+    const checks = [
+        ...tags.map(tag => (0, tag_check_1.TagCheck)(tag, tagValues)),
+        (0, stack_age_check_1.StackAgeCheck)(stack, timeoutHours)
+    ];
+    for (const check of checks) {
+        const { isLegacy, description } = check();
+        logger.log(`  ${isLegacy ? '[fail]' : '[pass]'} ${description}`);
+        if (!isLegacy) {
+            logger.log('  [result] not a legacy stack - skipping');
+            return false;
+        }
+    }
+    logger.log('  [result] legacy stack - marking for cleanup');
+    return true;
+});
+exports.isLegacyStack = isLegacyStack;
+
+
+/***/ }),
+
 /***/ 42357:
 /***/ ((module) => {
 
@@ -77674,7 +77687,7 @@ module.exports = require("zlib");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(9536);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

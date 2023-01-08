@@ -5,5 +5,10 @@ module.exports = {
   transform: {
     '^.+\\.ts$': 'ts-jest'
   },
-  verbose: true
+  verbose: true,
+  moduleNameMapper: {
+    "^@entities/(.*)$": "<rootDir>/src/domain/entities/$1",
+    "^@usecases/(.*)$": "<rootDir>/src/domain/usecases/$1",
+    "^@app/(.*)$": "<rootDir>/src/app/$1",
+  },
 }

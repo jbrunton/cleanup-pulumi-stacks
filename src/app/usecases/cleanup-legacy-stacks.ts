@@ -1,15 +1,11 @@
+import * as usecases from '@usecases/cleanup-legacy-stacks'
+import {LegacyStackSpec, Options} from '@usecases/get-legacy-stacks'
 import {LocalWorkspace} from '@pulumi/pulumi/automation'
-import {
-  LegacyStackSpec,
-  Logger,
-  Options
-} from '../../domain/usecases/get-legacy-stacks'
-import * as usecases from '../../domain/usecases/cleanup-legacy-stacks'
 
 export const cleanupLegacyStacks = async (
   options: Options,
   legacySpec: LegacyStackSpec
-) => {
+): Promise<void> => {
   const {workDir} = options
   const workspace = await LocalWorkspace.create({workDir})
   const stacks = await workspace.listStacks()
@@ -20,10 +16,10 @@ export const cleanupLegacyStacks = async (
 }
 
 class PreviewStackCleaner implements usecases.StackCleaner {
-  destroyStack(): Promise<void> {
+  async destroyStack(): Promise<void> {
     return Promise.resolve()
   }
-  removeStack(): Promise<void> {
+  async removeStack(): Promise<void> {
     return Promise.resolve()
   }
 }

@@ -1,6 +1,6 @@
-import micromatch from 'micromatch'
-import {TagSpec} from '../get-legacy-stacks'
 import {CheckResult} from './check'
+import {TagSpec} from '../get-legacy-stacks'
+import micromatch from 'micromatch'
 
 export const TagCheck = (
   tagSpec: TagSpec,
