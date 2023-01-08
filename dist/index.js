@@ -46,6 +46,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanupLegacyStacks = void 0;
 const usecases = __importStar(__nccwpck_require__(2637));
 const automation_1 = __nccwpck_require__(34925);
+const pulumi_1 = __nccwpck_require__(91902);
 const cleanupLegacyStacks = (options, legacySpec) => __awaiter(void 0, void 0, void 0, function* () {
     const { workDir } = options;
     const workspace = yield automation_1.LocalWorkspace.create({ workDir });
@@ -53,7 +54,7 @@ const cleanupLegacyStacks = (options, legacySpec) => __awaiter(void 0, void 0, v
     const cleaner = options.preview
         ? new PreviewStackCleaner()
         : new StackCleaner(workspace, workDir);
-    yield usecases.cleanupLegacyStacks(stacks, cleaner, legacySpec, options);
+    yield usecases.cleanupLegacyStacks(stacks.map(summary => new pulumi_1.PulumiStack(summary, workDir)), cleaner, legacySpec, options);
 });
 exports.cleanupLegacyStacks = cleanupLegacyStacks;
 class PreviewStackCleaner {
@@ -77225,22 +77226,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTagValue = void 0;
+exports.PulumiStack = void 0;
 const cmd = __importStar(__nccwpck_require__(56791));
-const getTagValue = (stackName, tag, workDir) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    try {
-        const value = yield cmd.exec(`pulumi stack tag get ${tag} --stack ${stackName} --cwd ${workDir}`);
-        return value.trim();
+class PulumiStack {
+    constructor(summary, workDir) {
+        this.name = summary.name;
+        this.lastUpdate = summary.lastUpdate
+            ? new Date(summary.lastUpdate)
+            : undefined;
+        this.updateInProgress = summary.updateInProgress;
+        this.resourceCount = summary.resourceCount;
+        this.workDir = workDir;
     }
-    catch (e) {
-        if ((_a = e.message) === null || _a === void 0 ? void 0 : _a.includes(`stack tag '${tag}' not found`)) {
-            return null;
-        }
-        throw e;
+    getTag(tag) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const value = yield cmd.exec(`pulumi stack tag get ${tag} --stack ${this.name} --cwd ${this.workDir}`);
+                return value.trim();
+            }
+            catch (e) {
+                if ((_a = e.message) === null || _a === void 0 ? void 0 : _a.includes(`stack tag '${tag}' not found`)) {
+                    return null;
+                }
+                throw e;
+            }
+        });
     }
-});
-exports.getTagValue = getTagValue;
+}
+exports.PulumiStack = PulumiStack;
 
 
 /***/ }),
@@ -77334,17 +77348,74 @@ exports.createLogger = createLogger;
 
 /***/ }),
 
-/***/ 38899:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+/***/ 85830:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CheckLegacyStack = void 0;
+const stack_age_check_1 = __nccwpck_require__(38899);
+const tag_check_1 = __nccwpck_require__(21477);
+const update_check_1 = __nccwpck_require__(95442);
+const CheckLegacyStack = ({ tags, timeoutHours }, logger) => {
+    const checks = [
+        update_check_1.UpdateCheck,
+        (0, stack_age_check_1.StackAgeCheck)(timeoutHours),
+        ...tags.map(tag => (0, tag_check_1.TagCheck)(tag))
+    ];
+    return (stack) => __awaiter(void 0, void 0, void 0, function* () {
+        logger.log(`checking stack ${stack.name}`);
+        for (const check of checks) {
+            const { isLegacy, description } = yield check(stack);
+            logger.log(`  ${isLegacy ? '[fail]' : '[pass]'} ${description}`);
+            if (!isLegacy) {
+                logger.log('  [result] not a legacy stack - skipping');
+                return { name: stack.name, isLegacy: false, requireDestroy: false };
+            }
+        }
+        logger.log('  [result] legacy stack - marking for cleanup');
+        return {
+            name: stack.name,
+            isLegacy: true,
+            requireDestroy: !!stack.resourceCount
+        };
+    });
+};
+exports.CheckLegacyStack = CheckLegacyStack;
+
+
+/***/ }),
+
+/***/ 38899:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StackAgeCheck = void 0;
 const date_fns_1 = __nccwpck_require__(73314);
-const StackAgeCheck = (stack, timeoutHours) => {
-    return () => {
-        const stackAge = stack.lastUpdate ? new Date(stack.lastUpdate) : null;
+const StackAgeCheck = (timeoutHours) => {
+    return (stack) => __awaiter(void 0, void 0, void 0, function* () {
+        const stackAge = stack.lastUpdate;
         const timeoutAge = (0, date_fns_1.subHours)(new Date(), timeoutHours);
         const isLegacy = stackAge ? stackAge < timeoutAge : false;
         const description = `checked stack age [${stackAge === null || stackAge === void 0 ? void 0 : stackAge.toISOString()}] against timeout [${timeoutHours} hours]`;
@@ -77352,7 +77423,7 @@ const StackAgeCheck = (stack, timeoutHours) => {
             isLegacy,
             description
         };
-    };
+    });
 };
 exports.StackAgeCheck = StackAgeCheck;
 
@@ -77364,24 +77435,62 @@ exports.StackAgeCheck = StackAgeCheck;
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TagCheck = void 0;
 const micromatch_1 = __importDefault(__nccwpck_require__(76228));
-const TagCheck = (tagSpec, tagValues) => {
-    return () => {
-        const value = tagValues[tagSpec.tag];
+const TagCheck = (tagSpec) => {
+    return (stack) => __awaiter(void 0, void 0, void 0, function* () {
+        const value = yield stack.getTag(tagSpec.tag);
         const isLegacy = value ? micromatch_1.default.isMatch(value, tagSpec.patterns) : false;
         const description = `checked tag [${tagSpec.tag}=${value}] against patterns [${tagSpec.patterns}]`;
         return {
             isLegacy,
             description
         };
-    };
+    });
 };
 exports.TagCheck = TagCheck;
+
+
+/***/ }),
+
+/***/ 95442:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateCheck = void 0;
+const UpdateCheck = (stack) => __awaiter(void 0, void 0, void 0, function* () {
+    const isLegacy = !stack.updateInProgress;
+    const description = `checked [updateInProgress=${stack.updateInProgress}]`;
+    return {
+        isLegacy,
+        description
+    };
+});
+exports.UpdateCheck = UpdateCheck;
 
 
 /***/ }),
@@ -77402,10 +77511,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanupLegacyStacks = void 0;
-const get_legacy_stacks_1 = __nccwpck_require__(6198);
+const check_legacy_stack_1 = __nccwpck_require__(85830);
 const cleanupLegacyStacks = (stacks, cleaner, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
     const { logger } = options;
-    const legacyStacks = yield (0, get_legacy_stacks_1.getLegacyStacks)(stacks, legacySpec, options);
+    const check = (0, check_legacy_stack_1.CheckLegacyStack)(legacySpec, logger);
+    const legacyStacks = [];
+    for (const stack of stacks) {
+        const result = yield check(stack);
+        if (result.isLegacy) {
+            legacyStacks.push(result);
+        }
+    }
     logger.info(`Found ${legacyStacks.length} legacy dev stack(s) out of ${stacks.length} total`);
     const cleanupStack = ({ name, requireDestroy }) => __awaiter(void 0, void 0, void 0, function* () {
         if (requireDestroy) {
@@ -77419,68 +77535,6 @@ const cleanupLegacyStacks = (stacks, cleaner, legacySpec, options) => __awaiter(
     logger.info(`Removed ${legacyStacks.length} legacy stacks, ${stacks.length - legacyStacks.length} remaining`);
 });
 exports.cleanupLegacyStacks = cleanupLegacyStacks;
-
-
-/***/ }),
-
-/***/ 6198:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isLegacyStack = exports.getLegacyStacks = void 0;
-const stack_age_check_1 = __nccwpck_require__(38899);
-const tag_check_1 = __nccwpck_require__(21477);
-const pulumi_1 = __nccwpck_require__(91902);
-const getLegacyStacks = (stacks, legacySpec, options) => __awaiter(void 0, void 0, void 0, function* () {
-    const legacyStacks = [];
-    for (const stack of stacks) {
-        if (yield (0, exports.isLegacyStack)(stack, legacySpec, options)) {
-            legacyStacks.push(stack);
-        }
-    }
-    return legacyStacks.map(({ name, resourceCount }) => ({
-        name,
-        requireDestroy: !!resourceCount
-    }));
-});
-exports.getLegacyStacks = getLegacyStacks;
-const getTagValues = (stackName, workDir, tags) => __awaiter(void 0, void 0, void 0, function* () {
-    const tagValues = yield Promise.all(tags.map((tagSpec) => __awaiter(void 0, void 0, void 0, function* () {
-        const value = yield (0, pulumi_1.getTagValue)(stackName, tagSpec.tag, workDir);
-        return [tagSpec.tag, value];
-    })));
-    return Object.fromEntries(tagValues);
-});
-const isLegacyStack = (stack, { tags, timeoutHours }, { workDir, logger }) => __awaiter(void 0, void 0, void 0, function* () {
-    logger.log(`checking stack ${stack.name}`);
-    const tagValues = yield getTagValues(stack.name, workDir, tags);
-    const checks = [
-        ...tags.map(tag => (0, tag_check_1.TagCheck)(tag, tagValues)),
-        (0, stack_age_check_1.StackAgeCheck)(stack, timeoutHours)
-    ];
-    for (const check of checks) {
-        const { isLegacy, description } = check();
-        logger.log(`  ${isLegacy ? '[fail]' : '[pass]'} ${description}`);
-        if (!isLegacy) {
-            logger.log('  [result] not a legacy stack - skipping');
-            return false;
-        }
-    }
-    logger.log('  [result] legacy stack - marking for cleanup');
-    return true;
-});
-exports.isLegacyStack = isLegacyStack;
 
 
 /***/ }),
