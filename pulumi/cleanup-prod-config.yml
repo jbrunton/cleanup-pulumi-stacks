@@ -1,6 +1,5 @@
 prod:
   match:
-    tags:
-      environment: 'prod-$TEST_NAME*'
+    name: '$TEST_NAME-prod'
   ttl:
     hours: 0

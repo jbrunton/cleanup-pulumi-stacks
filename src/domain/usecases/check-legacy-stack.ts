@@ -1,6 +1,8 @@
+import {isNil, reject} from 'rambda'
 import {Check} from './checks/check'
 import {Stack} from '@entities/pulumi'
 import {StackAgeCheck} from './checks/stack-age-check'
+import {StackNameCheck} from './checks/stack-name-check'
 import {StackPolicy} from '@entities/policies'
 import {TagCheck} from './checks/tag-check'
 import {UpdateCheck} from './checks/update-check'
@@ -22,11 +24,13 @@ export type Options = {
   logger: Logger
 }
 
-const checksForPolicy = (policy: StackPolicy): Check[] => [
-  UpdateCheck,
-  StackAgeCheck(policy.ttl),
-  ...policy.match.tags.map(tag => TagCheck(tag))
-]
+const checksForPolicy = (policy: StackPolicy): Check[] =>
+  reject(isNil)([
+    UpdateCheck,
+    StackAgeCheck(policy.ttl),
+    policy.match.name ? StackNameCheck(policy.match.name) : undefined,
+    ...(policy.match.tags ? policy.match.tags.map(tag => TagCheck(tag)) : [])
+  ])
 
 const checkPolicy = async (
   policy: StackPolicy,

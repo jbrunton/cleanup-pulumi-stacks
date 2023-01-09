@@ -91771,14 +91771,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CheckLegacyStack = void 0;
+const rambda_1 = __nccwpck_require__(30674);
 const stack_age_check_1 = __nccwpck_require__(38899);
+const stack_name_check_1 = __nccwpck_require__(85258);
 const tag_check_1 = __nccwpck_require__(21477);
 const update_check_1 = __nccwpck_require__(95442);
-const checksForPolicy = (policy) => [
+const checksForPolicy = (policy) => (0, rambda_1.reject)(rambda_1.isNil)([
     update_check_1.UpdateCheck,
     (0, stack_age_check_1.StackAgeCheck)(policy.ttl),
-    ...policy.match.tags.map(tag => (0, tag_check_1.TagCheck)(tag))
-];
+    policy.match.name ? (0, stack_name_check_1.StackNameCheck)(policy.match.name) : undefined,
+    ...(policy.match.tags ? policy.match.tags.map(tag => (0, tag_check_1.TagCheck)(tag)) : [])
+]);
 const checkPolicy = (policy, stack, logger) => __awaiter(void 0, void 0, void 0, function* () {
     const checks = checksForPolicy(policy);
     for (const check of checks) {
@@ -91846,6 +91849,41 @@ const StackAgeCheck = (policy) => {
     });
 };
 exports.StackAgeCheck = StackAgeCheck;
+
+
+/***/ }),
+
+/***/ 85258:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StackNameCheck = void 0;
+const micromatch_1 = __importDefault(__nccwpck_require__(76228));
+const StackNameCheck = (policy) => {
+    return (stack) => __awaiter(void 0, void 0, void 0, function* () {
+        const isLegacy = micromatch_1.default.isMatch(stack.name, policy.patterns);
+        const description = `checked name [${stack.name}] against patterns [${policy.patterns}]`;
+        return {
+            isLegacy,
+            description
+        };
+    });
+};
+exports.StackNameCheck = StackNameCheck;
 
 
 /***/ }),
@@ -91973,23 +92011,22 @@ const TTLPolicyParser = zod_1.z.object({
     hours: zod_1.z.number().optional(),
     minutes: zod_1.z.number().optional()
 });
-const TagsPolicyParser = zod_1.z
-    .record(zod_1.z.string())
-    .transform((arg, ctx) => {
-    return Object.entries(arg).map(([tag, tagPatterns]) => {
-        const patterns = (0, rambda_1.split)(',', tagPatterns);
-        if (!patterns.length) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: `Missing patterns for tag: ${tag}`
-            });
-        }
-        return { tag, patterns };
-    });
+const PatternsParser = zod_1.z.string().transform((arg, ctx) => {
+    const patterns = (0, rambda_1.split)(',', arg);
+    if (!patterns.length) {
+        ctx.addIssue({
+            code: zod_1.z.ZodIssueCode.custom,
+            message: 'Missing patterns'
+        });
+    }
+    return patterns;
 });
+const TagsPolicyParser = zod_1.z
+    .record(PatternsParser)
+    .transform(arg => Object.entries(arg).map(([tag, patterns]) => ({ tag, patterns })));
 const MatchPolicy = zod_1.z.object({
-    // name: z.string(),
-    tags: TagsPolicyParser
+    name: PatternsParser.transform(patterns => ({ patterns })).optional(),
+    tags: TagsPolicyParser.optional()
 });
 const CleanupPolicyParser = zod_1.z
     .record(zod_1.z.object({
