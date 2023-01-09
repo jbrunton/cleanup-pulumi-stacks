@@ -1,4 +1,4 @@
-import {parsePolicies} from '@entities/policies'
+import {parsePolicies} from '@usecases/parse-policies'
 
 describe('parsePolicies', () => {
   it('parses valid yaml', () => {
