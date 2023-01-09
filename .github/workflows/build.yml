@@ -87,6 +87,15 @@ jobs:
         run: EXPECTED_STACKS= npx ts-node assert-stacks
         working-directory: pulumi
 
+  mutation-test:
+    runs-on: ubuntu-latest
+    env:
+      STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm ci
+      - run: npm run test:mutate
+
   check-dist:
     runs-on: ubuntu-latest
     steps:
