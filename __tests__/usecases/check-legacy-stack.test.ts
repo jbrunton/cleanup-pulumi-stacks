@@ -1,15 +1,13 @@
 import {StackSummary} from '@pulumi/pulumi/automation'
 import {mock} from 'jest-mock-extended'
-import {
-  CheckLegacyStack,
-  LegacyResult,
-  Logger
-} from '@usecases/check-legacy-stack'
+import {CheckLegacyStack} from '@usecases/check-legacy-stack'
 import * as cmd from '@app/adapters/cmd'
 import {subHours} from 'date-fns'
-import {PulumiStack} from '@app/adapters/pulumi'
+import {PulumiStack} from '@app/adapters/pulumi/stack'
 import {StackPolicy} from '@entities/policies'
 import {assertLogs} from '../fixtures/assertions'
+import {Logger} from '@entities/lib'
+import {LegacyResult} from '@entities/checks'
 
 jest.mock('@app/adapters/cmd')
 

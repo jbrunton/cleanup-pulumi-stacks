@@ -1,4 +1,5 @@
-import {LegacyResult, Logger} from './check-legacy-stack'
+import {LegacyResult} from '@entities/checks'
+import {Logger} from '@entities/lib'
 import {Stack} from '@entities/pulumi'
 
 export interface StackCleaner {
@@ -6,12 +7,12 @@ export interface StackCleaner {
   removeStack(stackName: string): Promise<void>
 }
 
-export type CheckStack = (stack: Stack) => Promise<LegacyResult>
+export type StackCheck = (stack: Stack) => Promise<LegacyResult>
 
 export const cleanupLegacyStacks = async (
   stacks: Stack[],
   cleaner: StackCleaner,
-  check: CheckStack,
+  check: StackCheck,
   logger: Logger
 ): Promise<void> => {
   const legacyStacks: LegacyResult[] = []

@@ -20,14 +20,7 @@ describe('getInputs', () => {
   it('parses inputs', () => {
     const core = stubInputs(
       {
-        config: `
-        dev:
-          match:
-            tags:
-              environment: staging, dev-*
-          ttl:
-            hours: 3
-      `,
+        config: 'test: config',
         'working-directory': '.'
       },
       {
@@ -37,19 +30,11 @@ describe('getInputs', () => {
 
     const inputs = getInputs(core)
 
-    expect(inputs.policies).toEqual([
-      {
-        match: {
-          tags: [{patterns: ['staging', ' dev-*'], tag: 'environment'}]
-        },
-        name: 'dev',
-        ttl: {hours: 3}
-      }
-    ])
-
-    expect(pick(['preview', 'workDir'], inputs.options)).toEqual({
-      workDir: '.',
-      preview: true
+    expect(inputs).toEqual({
+      config: 'test: config',
+      preview: true,
+      verbose: false,
+      workDir: '.'
     })
   })
 })

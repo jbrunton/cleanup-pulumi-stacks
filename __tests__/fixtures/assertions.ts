@@ -1,4 +1,4 @@
-import {Logger} from '@usecases/check-legacy-stack'
+import {Logger} from '@entities/lib'
 
 export const assertLogs = (logger: Logger, expected: string[]) => {
   expected.forEach((expectedMessage, index) => {

@@ -1,4 +1,4 @@
-import * as cmd from './cmd'
+import * as cmd from '../cmd'
 import {Stack} from '@entities/pulumi'
 import {StackSummary} from '@pulumi/pulumi/automation'
 
