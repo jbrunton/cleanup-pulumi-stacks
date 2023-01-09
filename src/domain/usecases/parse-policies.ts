@@ -31,14 +31,16 @@ const MatchPolicy = z.object({
 })
 
 const CleanupPolicyParser = z
-  .record(
-    z.object({
-      match: MatchPolicy,
-      ttl: TTLPolicyParser
-    })
-  )
+  .object({
+    policies: z.record(
+      z.object({
+        match: MatchPolicy,
+        ttl: TTLPolicyParser
+      })
+    )
+  })
   .transform(arg =>
-    Object.entries(arg).map(([name, policy]) => ({name, ...policy}))
+    Object.entries(arg.policies).map(([name, policy]) => ({name, ...policy}))
   )
 
 export const parsePolicies: PolicyParser = input => {
