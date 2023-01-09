@@ -2,9 +2,6 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  project:
-    required: true
-    description: Pulumi project to check
   working-directory:
     description: Working directory of your Pulumi project
     default: '.'
