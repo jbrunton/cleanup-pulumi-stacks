@@ -12,6 +12,7 @@
     "lint": "eslint 'src/**/*.ts'",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
+    "test:mutate": "stryker run",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
@@ -35,6 +36,8 @@
     "zod": "3.20.2"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "6.3.1",
+    "@stryker-mutator/jest-runner": "6.3.1",
     "@types/jest": "29.2.5",
     "@types/micromatch": "^4.0.2",
     "@types/node": "^18.11.0",
