@@ -53,4 +53,10 @@ describe('StackAgeCheck', () => {
         'checked stack age [undefined] against ttl [3 hours 30 minutes]'
     })
   })
+
+  it('requires a valid policy', () => {
+    expect(() => StackAgeCheck({})).toThrow('Invalid TTL policy')
+    expect(() => StackAgeCheck({days: 0})).not.toThrow()
+    expect(() => StackAgeCheck({hours: 1})).not.toThrow()
+  })
 })

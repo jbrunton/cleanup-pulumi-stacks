@@ -44,7 +44,7 @@ describe('CheckLegacyStack', () => {
         tags: [
           {
             tag: 'environment',
-            patterns: ['dev*']
+            pattern: 'dev*'
           }
         ]
       }
@@ -56,7 +56,7 @@ describe('CheckLegacyStack', () => {
       },
       match: {
         name: {
-          patterns: ['staging']
+          pattern: 'staging'
         }
       }
     }
@@ -101,11 +101,11 @@ describe('CheckLegacyStack', () => {
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
-      '    [pass] checked tag [environment=staging] against patterns [dev*]',
+      '    [pass] checked tag [environment=staging] against pattern [dev*]',
       '  checking policy staging',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
-      '    [fail] checked name [staging] against patterns [staging]',
+      '    [fail] checked name [staging] against pattern [staging]',
       '  [result] legacy stack - marking for cleanup'
     ])
   })
@@ -121,7 +121,7 @@ describe('CheckLegacyStack', () => {
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
-      '    [fail] checked tag [environment=development] against patterns [dev*]',
+      '    [fail] checked tag [environment=development] against pattern [dev*]',
       '  [result] legacy stack - marking for cleanup'
     ])
   })
@@ -137,11 +137,11 @@ describe('CheckLegacyStack', () => {
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
-      '    [pass] checked tag [environment=production] against patterns [dev*]',
+      '    [pass] checked tag [environment=production] against pattern [dev*]',
       '  checking policy staging',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
-      '    [pass] checked name [production] against patterns [staging]',
+      '    [pass] checked name [production] against pattern [staging]',
       '  [result] not a legacy stack - skipping'
     ])
   })

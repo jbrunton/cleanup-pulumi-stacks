@@ -1,15 +1,19 @@
 export type TTLPolicy = {
+  days?: number
   hours?: number
   minutes?: number
 }
 
+export const isValidTTL = ({days, hours, minutes}: TTLPolicy): boolean =>
+  !(days === undefined && hours === undefined && minutes === undefined)
+
 export type TagPolicy = {
   tag: string
-  patterns: string[]
+  pattern: string
 }
 
 export type StackNamePolicy = {
-  patterns: string[]
+  pattern: string
 }
 
 export type StackPolicy = {

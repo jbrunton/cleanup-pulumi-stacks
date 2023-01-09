@@ -20,7 +20,7 @@ describe('parsePolicies', () => {
     expect(policy).toEqual([
       {
         match: {
-          tags: [{patterns: ['dev*'], tag: 'environment'}]
+          tags: [{pattern: 'dev*', tag: 'environment'}]
         },
         name: 'clean-staging',
         ttl: {hours: 2}
@@ -28,7 +28,7 @@ describe('parsePolicies', () => {
       {
         match: {
           name: {
-            patterns: ['production']
+            pattern: 'production'
           }
         },
         name: 'clean-production',

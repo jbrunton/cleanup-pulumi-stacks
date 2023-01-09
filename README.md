@@ -87,25 +87,25 @@ Cleanup policies are listed under the `policies` key in the config. They must be
 
 ### TTL Policy
 
-The time-to-live policy can be specified in either minutes or hours:
+The time-to-live policy can be specified in either days, hours or minutes:
 
 ```yaml
 policies:
 
-  # cleanup any stacks not updated in the last 24 hours
+  # cleanup any stacks not updated in the last 3 days
   cleanup-previous-day:
     ttl:
-      hours: 24
+      days: 3
 
-  # cleanup any stacks not updated in the last 30 minutes
+  # cleanup any stacks not updated in the last 6 hours
   cleanup-previous-hour:
     ttl:
-      minutes: 30
+      hours: 6
 ```
 
 ### Stack Name Policy
 
-The stack name policy can be given a comma separated list of literals or glob patterns.
+The stack name policy can be given any glob pattern supported by [micromatch](https://github.com/micromatch/micromatch#matching-features).
 
 ```yaml
 policies:
@@ -124,15 +124,22 @@ policies:
     ttl:
       hours: 24
 
-  # match list of patterns (any stack named `test` or start with `dev-`)
+  # match logical 'or' of patterns (any stack named `test` or starting with `dev-`)
   cleanup-all:
     match:
-      name: test, dev-*
+      name: (test|dev-*)
+    ttl:
+      hours: 24
+
+  # match negations
+  cleanup-all:
+    match:
+      name: !production
     ttl:
       hours: 24
 ```
 
-# Tags Policy
+### Tags Policy
 
 The stack name policy can define patterns for arbitrary tags.
 
@@ -155,11 +162,11 @@ policies:
     ttl:
       hours: 24
 
-  # match list of patterns
+  # match logical 'or' of patterns
   cleanup-all:
     match:
       tags:
-        env: test, dev-*
+        env: test|dev-*
     ttl:
       hours: 24
 ```
