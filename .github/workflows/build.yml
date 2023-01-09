@@ -64,12 +64,13 @@ jobs:
           project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
           config: |
-            dev:
-              match:
-                tags:
-                  environment: 'dev-${{ env.TEST_NAME }}*'
-              ttl:
-                hours: 0
+            policies:
+              dev:
+                match:
+                  tags:
+                    environment: 'dev-${{ env.TEST_NAME }}*'
+                ttl:
+                  hours: 0
           verbose: true
       - name: assert prod stack only
         run: EXPECTED_STACKS=$PROD_STACK_NAME npx ts-node assert-stacks

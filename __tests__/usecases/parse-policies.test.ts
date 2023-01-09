@@ -3,17 +3,18 @@ import {parsePolicies} from '@usecases/parse-policies'
 describe('parsePolicies', () => {
   it('parses valid yaml', () => {
     const yaml = `
-      clean-staging:
-        match:
-          tags:
-            environment: dev*
-        ttl:
-          hours: 2
-      clean-production:
-        match:
-          name: production
-        ttl:
-          hours: 3
+      policies:
+        clean-staging:
+          match:
+            tags:
+              environment: dev*
+          ttl:
+            hours: 2
+        clean-production:
+          match:
+            name: production
+          ttl:
+            hours: 3
     `
     const policy = parsePolicies(yaml)
     expect(policy).toEqual([

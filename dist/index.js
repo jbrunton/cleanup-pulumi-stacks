@@ -92052,11 +92052,13 @@ const MatchPolicy = zod_1.z.object({
     tags: TagsPolicyParser.optional()
 });
 const CleanupPolicyParser = zod_1.z
-    .record(zod_1.z.object({
-    match: MatchPolicy,
-    ttl: TTLPolicyParser
-}))
-    .transform(arg => Object.entries(arg).map(([name, policy]) => (Object.assign({ name }, policy))));
+    .object({
+    policies: zod_1.z.record(zod_1.z.object({
+        match: MatchPolicy,
+        ttl: TTLPolicyParser
+    }))
+})
+    .transform(arg => Object.entries(arg.policies).map(([name, policy]) => (Object.assign({ name }, policy))));
 const parsePolicies = input => {
     const data = (0, yaml_1.parse)(input);
     return CleanupPolicyParser.parse(data);

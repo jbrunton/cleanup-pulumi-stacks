@@ -1,5 +1,6 @@
-prod:
-  match:
-    name: '$TEST_NAME-prod'
-  ttl:
-    hours: 0
+policies:
+  prod:
+    match:
+      name: '$TEST_NAME-prod'
+    ttl:
+      hours: 0
