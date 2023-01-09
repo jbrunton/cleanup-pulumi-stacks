@@ -45,6 +45,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanupLegacyStacks = void 0;
 const usecases = __importStar(__nccwpck_require__(2637));
+const check_legacy_stack_1 = __nccwpck_require__(85830);
 const automation_1 = __nccwpck_require__(34925);
 const pulumi_1 = __nccwpck_require__(91902);
 const cleanupLegacyStacks = (options, policies) => __awaiter(void 0, void 0, void 0, function* () {
@@ -54,7 +55,7 @@ const cleanupLegacyStacks = (options, policies) => __awaiter(void 0, void 0, voi
     const cleaner = options.preview
         ? new PreviewStackCleaner()
         : new StackCleaner(workspace, workDir);
-    yield usecases.cleanupLegacyStacks(stacks.map(summary => new pulumi_1.PulumiStack(summary, workDir)), cleaner, policies, options);
+    yield usecases.cleanupLegacyStacks(stacks.map(summary => new pulumi_1.PulumiStack(summary, workDir)), cleaner, (0, check_legacy_stack_1.CheckLegacyStack)(policies, options.logger), options.logger);
 });
 exports.cleanupLegacyStacks = cleanupLegacyStacks;
 class PreviewStackCleaner {
@@ -91954,7 +91955,7 @@ exports.UpdateCheck = UpdateCheck;
 /***/ }),
 
 /***/ 2637:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
@@ -91969,10 +91970,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.cleanupLegacyStacks = void 0;
-const check_legacy_stack_1 = __nccwpck_require__(85830);
-const cleanupLegacyStacks = (stacks, cleaner, policies, options) => __awaiter(void 0, void 0, void 0, function* () {
-    const { logger } = options;
-    const check = (0, check_legacy_stack_1.CheckLegacyStack)(policies, logger);
+const cleanupLegacyStacks = (stacks, cleaner, check, logger) => __awaiter(void 0, void 0, void 0, function* () {
     const legacyStacks = [];
     for (const stack of stacks) {
         const result = yield check(stack);
