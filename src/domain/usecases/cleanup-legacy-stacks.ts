@@ -1,21 +1,19 @@
-import {CheckLegacyStack, LegacyResult, Options} from './check-legacy-stack'
+import {LegacyResult, Logger} from './check-legacy-stack'
 import {Stack} from '@entities/pulumi'
-import {StackPolicy} from '@entities/policies'
 
 export interface StackCleaner {
   destroyStack(stackName: string): Promise<void>
   removeStack(stackName: string): Promise<void>
 }
 
+export type CheckStack = (stack: Stack) => Promise<LegacyResult>
+
 export const cleanupLegacyStacks = async (
   stacks: Stack[],
   cleaner: StackCleaner,
-  policies: StackPolicy[],
-  options: Options
+  check: CheckStack,
+  logger: Logger
 ): Promise<void> => {
-  const {logger} = options
-
-  const check = CheckLegacyStack(policies, logger)
   const legacyStacks: LegacyResult[] = []
 
   for (const stack of stacks) {

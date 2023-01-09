@@ -9,6 +9,7 @@ import * as cmd from '@app/adapters/cmd'
 import {subHours} from 'date-fns'
 import {PulumiStack} from '@app/adapters/pulumi'
 import {StackPolicy} from '@entities/policies'
+import {assertLogs} from '../fixtures/assertions'
 
 jest.mock('@app/adapters/cmd')
 
@@ -70,13 +71,6 @@ describe('CheckLegacyStack', () => {
     expect(actual).toEqual(expected)
   }
 
-  const assertLogs = (expected: string[]) => {
-    expected.forEach((expectedMessage, index) => {
-      expect(logger.log).toHaveBeenNthCalledWith(index + 1, expectedMessage)
-    })
-    expect(logger.log).toHaveBeenCalledTimes(expected.length)
-  }
-
   const production: StackSummary = {
     name: 'production',
     updateInProgress: false,
@@ -104,7 +98,7 @@ describe('CheckLegacyStack', () => {
       isLegacy: true,
       requireDestroy: false
     })
-    assertLogs([
+    assertLogs(logger, [
       'checking stack staging',
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',
@@ -124,7 +118,7 @@ describe('CheckLegacyStack', () => {
       isLegacy: true,
       requireDestroy: false
     })
-    assertLogs([
+    assertLogs(logger, [
       'checking stack development',
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',
@@ -140,7 +134,7 @@ describe('CheckLegacyStack', () => {
       isLegacy: false,
       requireDestroy: false
     })
-    assertLogs([
+    assertLogs(logger, [
       'checking stack production',
       '  checking policy dev',
       '    [fail] checked [updateInProgress=false]',

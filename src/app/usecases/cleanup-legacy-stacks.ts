@@ -1,6 +1,6 @@
 import * as usecases from '@usecases/cleanup-legacy-stacks'
+import {CheckLegacyStack, Options} from '@usecases/check-legacy-stack'
 import {LocalWorkspace} from '@pulumi/pulumi/automation'
-import {Options} from '@usecases/check-legacy-stack'
 import {PulumiStack} from '@app/adapters/pulumi'
 import {StackPolicy} from '@entities/policies'
 
@@ -17,8 +17,8 @@ export const cleanupLegacyStacks = async (
   await usecases.cleanupLegacyStacks(
     stacks.map(summary => new PulumiStack(summary, workDir)),
     cleaner,
-    policies,
-    options
+    CheckLegacyStack(policies, options.logger),
+    options.logger
   )
 }
 
