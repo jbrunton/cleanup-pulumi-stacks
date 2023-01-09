@@ -1,7 +1,7 @@
+import {LegacyResult} from '@entities/checks'
+import {Logger} from '@entities/lib'
 import {Stack} from '@entities/pulumi'
-import {LegacyResult, Logger} from '@usecases/check-legacy-stack'
 import {
-  CheckStack,
   cleanupLegacyStacks,
   StackCleaner
 } from '@usecases/cleanup-legacy-stacks'

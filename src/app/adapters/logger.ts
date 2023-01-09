@@ -1,12 +1,15 @@
 import * as core from '@actions/core'
-import {Logger} from '@usecases/check-legacy-stack'
+import {Logger} from '@entities/lib'
 
-export type LoggerParams = {
+type CreateLoggerParams = {
   preview: boolean
   verbose: boolean
 }
 
-export const createLogger = ({preview, verbose}: LoggerParams): Logger => ({
+export const createLogger = ({
+  preview,
+  verbose
+}: CreateLoggerParams): Logger => ({
   info: preview
     ? (message: string) => core.info(`[PREVIEW] ${message}`)
     : core.info,

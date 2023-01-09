@@ -4,8 +4,8 @@ import {getInputs} from '@app/inputs'
 
 async function run(): Promise<void> {
   try {
-    const {options, policies} = getInputs(core)
-    await cleanupLegacyStacks(options, policies)
+    const inputs = getInputs(core)
+    await cleanupLegacyStacks(inputs)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

@@ -1,28 +1,13 @@
 import {isNil, reject} from 'rambda'
 import {Check} from './checks/check'
+import {LegacyResult} from '@entities/checks'
+import {Logger} from '@entities/lib'
 import {Stack} from '@entities/pulumi'
 import {StackAgeCheck} from './checks/stack-age-check'
 import {StackNameCheck} from './checks/stack-name-check'
 import {StackPolicy} from '@entities/policies'
 import {TagCheck} from './checks/tag-check'
 import {UpdateCheck} from './checks/update-check'
-
-export type LegacyResult = {
-  name: string
-  isLegacy: boolean
-  requireDestroy: boolean
-}
-
-export type Logger = {
-  info: (message: string) => void
-  log: (message: string) => void
-}
-
-export type Options = {
-  workDir: string
-  preview: boolean
-  logger: Logger
-}
 
 const checksForPolicy = (policy: StackPolicy): Check[] =>
   reject(isNil)([
