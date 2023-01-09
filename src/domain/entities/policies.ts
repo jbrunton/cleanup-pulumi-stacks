@@ -8,11 +8,15 @@ export type TagPolicy = {
   patterns: string[]
 }
 
+export type StackNamePolicy = {
+  patterns: string[]
+}
+
 export type StackPolicy = {
   name: string
   match: {
-    // name: z.string(),
-    tags: TagPolicy[]
+    name?: StackNamePolicy
+    tags?: TagPolicy[]
   }
   ttl: TTLPolicy
 }

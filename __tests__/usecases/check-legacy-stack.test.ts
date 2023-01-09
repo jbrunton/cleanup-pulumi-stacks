@@ -56,12 +56,9 @@ describe('CheckLegacyStack', () => {
         hours: 12
       },
       match: {
-        tags: [
-          {
-            tag: 'environment',
-            patterns: ['staging']
-          }
-        ]
+        name: {
+          patterns: ['staging']
+        }
       }
     }
   ]
@@ -116,7 +113,7 @@ describe('CheckLegacyStack', () => {
       '  checking policy staging',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
-      '    [fail] checked tag [environment=staging] against patterns [staging]',
+      '    [fail] checked name [staging] against patterns [staging]',
       '  [result] legacy stack - marking for cleanup'
     ])
   })
@@ -152,7 +149,7 @@ describe('CheckLegacyStack', () => {
       '  checking policy staging',
       '    [fail] checked [updateInProgress=false]',
       '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
-      '    [pass] checked tag [environment=production] against patterns [staging]',
+      '    [pass] checked name [production] against patterns [staging]',
       '  [result] not a legacy stack - skipping'
     ])
   })

@@ -9,6 +9,11 @@ describe('parsePolicies', () => {
             environment: dev*
         ttl:
           hours: 2
+      clean-production:
+        match:
+          name: production
+        ttl:
+          hours: 3
     `
     const policy = parsePolicies(yaml)
     expect(policy).toEqual([
@@ -18,6 +23,15 @@ describe('parsePolicies', () => {
         },
         name: 'clean-staging',
         ttl: {hours: 2}
+      },
+      {
+        match: {
+          name: {
+            patterns: ['production']
+          }
+        },
+        name: 'clean-production',
+        ttl: {hours: 3}
       }
     ])
   })

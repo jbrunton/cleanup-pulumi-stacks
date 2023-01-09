@@ -8,24 +8,26 @@ const TTLPolicyParser = z.object({
   minutes: z.number().optional()
 })
 
-const TagsPolicyParser = z
-  .record(z.string())
-  .transform((arg: Record<string, string>, ctx) => {
-    return Object.entries(arg).map(([tag, tagPatterns]) => {
-      const patterns = split(',', tagPatterns)
-      if (!patterns.length) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Missing patterns for tag: ${tag}`
-        })
-      }
-      return {tag, patterns}
+const PatternsParser = z.string().transform((arg, ctx) => {
+  const patterns = split(',', arg)
+  if (!patterns.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Missing patterns'
     })
-  })
+  }
+  return patterns
+})
+
+const TagsPolicyParser = z
+  .record(PatternsParser)
+  .transform(arg =>
+    Object.entries(arg).map(([tag, patterns]) => ({tag, patterns}))
+  )
 
 const MatchPolicy = z.object({
-  // name: z.string(),
-  tags: TagsPolicyParser
+  name: PatternsParser.transform(patterns => ({patterns})).optional(),
+  tags: TagsPolicyParser.optional()
 })
 
 const CleanupPolicyParser = z
