@@ -91682,14 +91682,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInputs = void 0;
 const fs = __importStar(__nccwpck_require__(35747));
 const path = __importStar(__nccwpck_require__(85622));
-const policies_1 = __nccwpck_require__(82150);
 const logger_1 = __nccwpck_require__(35719);
+const parse_policies_1 = __nccwpck_require__(30481);
 const getInputs = (core) => {
     const workDir = core.getInput('working-directory');
     const preview = core.getBooleanInput('preview');
     const verbose = core.getBooleanInput('verbose');
     const configYaml = getConfigYaml(workDir, core);
-    const policies = (0, policies_1.parsePolicies)(configYaml);
+    const policies = (0, parse_policies_1.parsePolicies)(configYaml);
     return {
         options: {
             preview,
@@ -91751,53 +91751,6 @@ const createLogger = ({ preview, verbose }) => ({
     log: verbose ? core.info : () => { }
 });
 exports.createLogger = createLogger;
-
-
-/***/ }),
-
-/***/ 82150:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parsePolicies = void 0;
-const yaml_1 = __nccwpck_require__(65065);
-const rambda_1 = __nccwpck_require__(30674);
-const zod_1 = __nccwpck_require__(63301);
-const TTLPolicyParser = zod_1.z.object({
-    hours: zod_1.z.number().optional(),
-    minutes: zod_1.z.number().optional()
-});
-const TagsPolicyParser = zod_1.z
-    .record(zod_1.z.string())
-    .transform((arg, ctx) => {
-    return Object.entries(arg).map(([tag, tagPatterns]) => {
-        const patterns = (0, rambda_1.split)(',', tagPatterns);
-        if (!patterns.length) {
-            ctx.addIssue({
-                code: zod_1.z.ZodIssueCode.custom,
-                message: `Missing patterns for tag: ${tag}`
-            });
-        }
-        return { tag, patterns };
-    });
-});
-const MatchPolicy = zod_1.z.object({
-    // name: z.string(),
-    tags: TagsPolicyParser
-});
-const CleanupPolicyParser = zod_1.z
-    .record(zod_1.z.object({
-    match: MatchPolicy,
-    ttl: TTLPolicyParser
-}))
-    .transform(arg => Object.entries(arg).map(([name, policy]) => (Object.assign({ name }, policy))));
-const parsePolicies = (input) => {
-    const data = (0, yaml_1.parse)(input);
-    return CleanupPolicyParser.parse(data);
-};
-exports.parsePolicies = parsePolicies;
 
 
 /***/ }),
@@ -92002,6 +91955,53 @@ const cleanupLegacyStacks = (stacks, cleaner, policies, options) => __awaiter(vo
     logger.info(`Removed ${legacyStacks.length} legacy stacks, ${stacks.length - legacyStacks.length} remaining`);
 });
 exports.cleanupLegacyStacks = cleanupLegacyStacks;
+
+
+/***/ }),
+
+/***/ 30481:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parsePolicies = void 0;
+const yaml_1 = __nccwpck_require__(65065);
+const rambda_1 = __nccwpck_require__(30674);
+const zod_1 = __nccwpck_require__(63301);
+const TTLPolicyParser = zod_1.z.object({
+    hours: zod_1.z.number().optional(),
+    minutes: zod_1.z.number().optional()
+});
+const TagsPolicyParser = zod_1.z
+    .record(zod_1.z.string())
+    .transform((arg, ctx) => {
+    return Object.entries(arg).map(([tag, tagPatterns]) => {
+        const patterns = (0, rambda_1.split)(',', tagPatterns);
+        if (!patterns.length) {
+            ctx.addIssue({
+                code: zod_1.z.ZodIssueCode.custom,
+                message: `Missing patterns for tag: ${tag}`
+            });
+        }
+        return { tag, patterns };
+    });
+});
+const MatchPolicy = zod_1.z.object({
+    // name: z.string(),
+    tags: TagsPolicyParser
+});
+const CleanupPolicyParser = zod_1.z
+    .record(zod_1.z.object({
+    match: MatchPolicy,
+    ttl: TTLPolicyParser
+}))
+    .transform(arg => Object.entries(arg).map(([name, policy]) => (Object.assign({ name }, policy))));
+const parsePolicies = input => {
+    const data = (0, yaml_1.parse)(input);
+    return CleanupPolicyParser.parse(data);
+};
+exports.parsePolicies = parsePolicies;
 
 
 /***/ }),

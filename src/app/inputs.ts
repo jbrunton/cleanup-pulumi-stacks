@@ -1,9 +1,10 @@
 import * as actionsCore from '@actions/core'
 import * as fs from 'fs'
 import * as path from 'path'
-import {StackPolicy, parsePolicies} from '@entities/policies'
 import {Options} from '@usecases/check-legacy-stack'
+import {StackPolicy} from '@entities/policies'
 import {createLogger} from './logger'
+import {parsePolicies} from '@usecases/parse-policies'
 
 export type Inputs = {
   options: Options
