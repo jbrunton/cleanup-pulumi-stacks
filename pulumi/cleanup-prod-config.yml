@@ -1,0 +1,6 @@
+prod:
+  match:
+    tags:
+      environment: 'prod-$TEST_NAME*'
+  ttl:
+    hours: 0

@@ -1,20 +1,26 @@
-import * as core from '@actions/core'
-import {LegacyStackSpec, Options, TagSpec} from '@usecases/check-legacy-stack'
+import * as actionsCore from '@actions/core'
+import * as fs from 'fs'
+import * as path from 'path'
+import {StackPolicy, parsePolicies} from '@entities/policies'
+import {Options} from '@usecases/check-legacy-stack'
 import {createLogger} from './logger'
 
 export type Inputs = {
   options: Options
-  legacyStackSpec: LegacyStackSpec
+  policies: StackPolicy[]
 }
 
-export type ActionsCore = Pick<typeof core, 'getInput'>
+export type ActionsCore = Pick<
+  typeof actionsCore,
+  'getInput' | 'getBooleanInput' | 'info'
+>
 
-export const getInputs = ({getInput}: ActionsCore): Inputs => {
-  const workDir = getInput('working-directory')
-  const tags = parseTags(getInput('legacy-tags'))
-  const preview = getInput('preview') === 'true'
-  const timeoutHours = parseInt(getInput('timeout-hours'), 10)
-  const verbose = getInput('verbose') === 'true'
+export const getInputs = (core: ActionsCore): Inputs => {
+  const workDir = core.getInput('working-directory')
+  const preview = core.getBooleanInput('preview')
+  const verbose = core.getBooleanInput('verbose')
+  const configYaml = getConfigYaml(workDir, core)
+  const policies = parsePolicies(configYaml)
 
   return {
     options: {
@@ -22,32 +28,26 @@ export const getInputs = ({getInput}: ActionsCore): Inputs => {
       workDir,
       logger: createLogger({preview, verbose})
     },
-    legacyStackSpec: {
-      tags,
-      timeoutHours
-    }
+    policies
   }
 }
 
-const parseTags = (tagsInput: string): TagSpec[] => {
-  const lines = split(tagsInput, '\n')
-  return lines
-    .filter(line => line.length)
-    .map(line => {
-      const [tag, rest] = split(line, ':')
-      if (!rest) {
-        throw new Error(`Error parsing tag spec: ${line}`)
-      }
-      const patterns = split(rest, ',')
-      if (!patterns.length) {
-        throw new Error(`Error parsing tag spec: ${line}`)
-      }
-      return {
-        tag,
-        patterns
-      }
-    })
-}
+const getConfigYaml = (workDir: string, core: ActionsCore): string => {
+  const configYaml = core.getInput('config')
+  if (configYaml) {
+    return configYaml
+  }
 
-const split = (string: string, separator: string): string[] =>
-  string.split(separator).map(s => s.trim())
+  const configFile = path.join(
+    process.cwd(),
+    workDir,
+    core.getInput('config_file')
+  )
+  const exists = fs.existsSync(configFile)
+  if (!exists) {
+    throw new Error(`File ${configFile} does not exist`)
+  }
+
+  core.info(`reading config from ${configFile}`)
+  return fs.readFileSync(configFile, {encoding: 'utf8'})
+}

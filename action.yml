@@ -8,18 +8,21 @@ inputs:
   working-directory:
     description: Working directory of your Pulumi project
     default: '.'
-  legacy-tags:
-    required: true
-    description: Tags spec to check for legacy stacks
-  timeout-hours:
-    required: true
-    description: The number of hours since the last update after which a stack should be destroyed
+  config:
+    required: false
+    description: Cleanup policies to apply
+  config_file:
+    required: false
+    description: Path to a policies file
+    default: 'cleanup-config.yml'
   preview:
     required: false
     description: When set to true, logs what what the action would do but doesn\'t destroy and stacks
+    default: 'false'
   verbose:
     required: false
     description: Outputs detailed logs regarding the checks for each stack
+    default: 'false'
 runs:
   using: 'node16'
   main: 'dist/index.js'

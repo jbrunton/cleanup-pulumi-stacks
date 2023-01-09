@@ -3,12 +3,12 @@ import {mock} from 'jest-mock-extended'
 import {
   CheckLegacyStack,
   LegacyResult,
-  Logger,
-  TagSpec
+  Logger
 } from '@usecases/check-legacy-stack'
 import * as cmd from '@app/adapters/cmd'
 import {subHours} from 'date-fns'
 import {PulumiStack} from '@app/adapters/pulumi'
+import {StackPolicy} from '@entities/policies'
 
 jest.mock('@app/adapters/cmd')
 
@@ -17,7 +17,7 @@ const exec = jest.mocked(cmd.exec)
 describe('CheckLegacyStack', () => {
   const logger = mock<Logger>()
   const now = new Date('2021-01-01 12:00:00')
-  const lastUpdate = subHours(now, 12).toISOString()
+  const lastUpdate = subHours(now, 24).toISOString()
 
   beforeEach(() => {
     jest.useFakeTimers()
@@ -35,16 +35,40 @@ describe('CheckLegacyStack', () => {
     })
   })
 
-  const tags: TagSpec[] = [
+  const policies: StackPolicy[] = [
     {
-      tag: 'environment',
-      patterns: ['staging', 'dev*']
+      name: 'dev',
+      ttl: {
+        hours: 6
+      },
+      match: {
+        tags: [
+          {
+            tag: 'environment',
+            patterns: ['dev*']
+          }
+        ]
+      }
+    },
+    {
+      name: 'staging',
+      ttl: {
+        hours: 12
+      },
+      match: {
+        tags: [
+          {
+            tag: 'environment',
+            patterns: ['staging']
+          }
+        ]
+      }
     }
   ]
 
   const assertStack = async (summary: StackSummary, expected: LegacyResult) => {
     const stack = new PulumiStack(summary, './pulumi')
-    const check = CheckLegacyStack({tags, timeoutHours: 6}, logger)
+    const check = CheckLegacyStack(policies, logger)
     const actual = await check(stack)
     expect(actual).toEqual(expected)
   }
@@ -70,7 +94,34 @@ describe('CheckLegacyStack', () => {
     current: false
   }
 
+  const staging: StackSummary = {
+    name: 'staging',
+    updateInProgress: false,
+    lastUpdate,
+    current: false
+  }
+
   it('returns true for legacy stacks', async () => {
+    await assertStack(staging, {
+      name: 'staging',
+      isLegacy: true,
+      requireDestroy: false
+    })
+    assertLogs([
+      'checking stack staging',
+      '  checking policy dev',
+      '    [fail] checked [updateInProgress=false]',
+      '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
+      '    [pass] checked tag [environment=staging] against patterns [dev*]',
+      '  checking policy staging',
+      '    [fail] checked [updateInProgress=false]',
+      '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
+      '    [fail] checked tag [environment=staging] against patterns [staging]',
+      '  [result] legacy stack - marking for cleanup'
+    ])
+  })
+
+  it('short circuits policy checks', async () => {
     await assertStack(development, {
       name: 'development',
       isLegacy: true,
@@ -78,9 +129,10 @@ describe('CheckLegacyStack', () => {
     })
     assertLogs([
       'checking stack development',
-      '  [fail] checked [updateInProgress=false]',
-      '  [fail] checked stack age [2021-01-01T00:00:00.000Z] against timeout [6 hours]',
-      '  [fail] checked tag [environment=development] against patterns [staging,dev*]',
+      '  checking policy dev',
+      '    [fail] checked [updateInProgress=false]',
+      '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
+      '    [fail] checked tag [environment=development] against patterns [dev*]',
       '  [result] legacy stack - marking for cleanup'
     ])
   })
@@ -93,9 +145,14 @@ describe('CheckLegacyStack', () => {
     })
     assertLogs([
       'checking stack production',
-      '  [fail] checked [updateInProgress=false]',
-      '  [fail] checked stack age [2021-01-01T00:00:00.000Z] against timeout [6 hours]',
-      '  [pass] checked tag [environment=production] against patterns [staging,dev*]',
+      '  checking policy dev',
+      '    [fail] checked [updateInProgress=false]',
+      '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [6 hours]',
+      '    [pass] checked tag [environment=production] against patterns [dev*]',
+      '  checking policy staging',
+      '    [fail] checked [updateInProgress=false]',
+      '    [fail] checked stack age [2020-12-31T12:00:00.000Z] against ttl [12 hours]',
+      '    [pass] checked tag [environment=production] against patterns [staging]',
       '  [result] not a legacy stack - skipping'
     ])
   })

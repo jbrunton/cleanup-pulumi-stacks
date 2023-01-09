@@ -1,0 +1,8 @@
+policies:
+  clean-staging:
+    match:
+      name: staging
+      tags:
+        environment: dev*
+    ttl:
+      hours: 2
