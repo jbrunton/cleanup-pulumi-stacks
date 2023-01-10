@@ -7,12 +7,12 @@ describe('parsePolicies', () => {
         clean-staging:
           match:
             tags:
-              environment: dev*
+              environment: 'dev*'
           ttl:
             hours: 2
         clean-production:
           match:
-            name: production
+            name: '!production'
           ttl:
             hours: 3
     `
@@ -28,7 +28,7 @@ describe('parsePolicies', () => {
       {
         match: {
           name: {
-            pattern: 'production'
+            pattern: '!production'
           }
         },
         name: 'clean-production',
