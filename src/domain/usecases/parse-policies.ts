@@ -1,4 +1,4 @@
-import {PolicyParser, isValidTTL} from '@entities/policies'
+import {PolicyParser, isValidMatchPolicy, isValidTTL} from '@entities/policies'
 import {parse} from 'yaml'
 import {z} from 'zod'
 
@@ -18,19 +18,23 @@ const TagsPolicyParser = z
     Object.entries(arg).map(([tag, pattern]) => ({tag, pattern}))
   )
 
-const MatchPolicy = z.object({
-  name: z
-    .string()
-    .transform(pattern => ({pattern}))
-    .optional(),
-  tags: TagsPolicyParser.optional()
-})
+const MatchPolicy = z
+  .object({
+    name: z
+      .string()
+      .transform(pattern => ({pattern}))
+      .optional(),
+    tags: TagsPolicyParser.optional()
+  })
+  .refine(policy => isValidMatchPolicy(policy), {
+    message: 'Policy must match on either name or tags'
+  })
 
 const CleanupPolicyParser = z
   .object({
     policies: z.record(
       z.object({
-        match: MatchPolicy.optional(),
+        match: MatchPolicy,
         ttl: TTLPolicyParser
       })
     )

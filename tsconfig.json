@@ -12,7 +12,10 @@
       "@entities/*": ["domain/entities/*"],
       "@usecases/*": ["domain/usecases/*"],
       "@app/*": ["app/*"],
-    }
+    },
   },
-  "exclude": ["node_modules", "./pulumi"]
+  "exclude": ["node_modules", "./pulumi"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

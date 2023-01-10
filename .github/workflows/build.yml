@@ -61,7 +61,6 @@ jobs:
       - name: 'test: cleanup dev stack [tags policy, config input]'
         uses: ./
         with:
-          project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
           config: |
             policies:
@@ -72,6 +71,7 @@ jobs:
                 ttl:
                   hours: 0
           verbose: true
+          preview: false
       - name: assert prod stack only
         run: EXPECTED_STACKS=$PROD_STACK_NAME npx ts-node assert-stacks
         working-directory: pulumi
@@ -81,9 +81,9 @@ jobs:
       - name: 'test: cleanup prod stack [tags policy, default config_file input]'
         uses: ./
         with:
-          project: jbrunton/test-cleanup-pulumi-stacks
           working-directory: pulumi
           verbose: true
+          preview: false
       - name: assert zero stacks
         run: EXPECTED_STACKS= npx ts-node assert-stacks
         working-directory: pulumi
