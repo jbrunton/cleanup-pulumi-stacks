@@ -1,9 +1,24 @@
-# cleanup-pulumi-stacks
+# Cleanup Pulumi Stacks
 
 [![build](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml/badge.svg)](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml)
 [![Mutation coverage](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjbrunton%2Fcleanup-pulumi-stacks%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/jbrunton/cleanup-pulumi-stacks/develop)
 
 A GitHub Action to automatically cleanup development/preview stacks in a Pulumi project.
+
+## Contents
+
+- [Cleanup Pulumi Stacks](#cleanup-pulumi-stacks)
+  - [Contents](#contents)
+  - [Getting Started](#getting-started)
+  - [Inputs](#inputs)
+  - [Config](#config)
+  - [Policies](#policies)
+    - [TTL Policy](#ttl-policy)
+    - [Stack Name Policy](#stack-name-policy)
+    - [Tags Policy](#tags-policy)
+  - [Protecting Production Resources](#protecting-production-resources)
+    - [Steps you should take](#steps-you-should-take)
+    - [Steps this action takes](#steps-this-action-takes)
 
 ## Getting Started 
 
@@ -83,7 +98,7 @@ You can specify the config in a couple of different ways:
 
 ## Policies
 
-Cleanup policies are listed under the `policies` key in the config. They must be given a `ttl` (time-to-live), and can also be configured to match on stack names, tags or both.
+Cleanup policies are listed under the `policies` key in the config. They must be given a `ttl` (time-to-live), and additional match parameters based on stack names or tags.
 
 ### TTL Policy
 
@@ -170,3 +185,19 @@ policies:
     ttl:
       hours: 24
 ```
+
+## Protecting Production Resources
+
+It goes without saying that you should be careful using any automated tool which will destroy your stacks. Here are a few ways this tool is designed to protect you from accidental deletes, and a few steps you can take.
+
+### Steps you should take
+
+1. Keep the action in preview mode until you're confident your policies work as expected.
+2. You can also use Pulumi's [protect resource](https://www.pulumi.com/docs/intro/concepts/resources/options/protect/) option on production resources. This will prevent the action from accidentally destroying anything it shouldn't.
+3. Consider using separate projects/accounts for production services.
+
+### Steps this action takes
+
+1. By default the action runs in preview mode, and won't destroy anything. You can view its runs and decide when to disable preview mode.
+2. You have to specify at least one `match` policy, so you can't accidentally add a "remove all" policy.
+3. Test coverage of key application logic is intentionally high, and checked using a mutation testing tool.

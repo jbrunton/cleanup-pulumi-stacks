@@ -1,6 +1,6 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Cleanup Pulumi Stacks'
+description: 'Automatically cleanup development/preview stacks in a Pulumi project'
+author: 'John Brunton'
 inputs:
   working-directory:
     description: Working directory of your Pulumi project
@@ -15,7 +15,7 @@ inputs:
   preview:
     required: false
     description: When set to true, logs what what the action would do but doesn\'t destroy and stacks
-    default: 'false'
+    default: 'true'
   verbose:
     required: false
     description: Outputs detailed logs regarding the checks for each stack

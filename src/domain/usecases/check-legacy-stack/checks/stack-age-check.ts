@@ -1,11 +1,8 @@
-import {TTLPolicy, isValidTTL} from '@entities/policies'
 import {formatDuration, sub} from 'date-fns'
 import {Check} from './check'
+import {TTLPolicy} from '@entities/policies'
 
 export const StackAgeCheck = (policy: TTLPolicy): Check => {
-  if (!isValidTTL(policy)) {
-    throw new Error('Invalid TTL policy')
-  }
   return async stack => {
     const stackAge = stack.lastUpdate
     const timeoutAge = sub(new Date(), policy)

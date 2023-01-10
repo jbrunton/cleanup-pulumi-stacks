@@ -10,12 +10,10 @@ import {TagCheck} from './checks/tag-check'
 import {UpdateCheck} from './checks/update-check'
 
 const checksForPolicy = ({match, ttl}: StackPolicy): Check[] => {
-  const matchChecks = match
-    ? [
-        match.name ? StackNameCheck(match.name) : undefined,
-        ...(match.tags ? match.tags.map(tag => TagCheck(tag)) : [])
-      ]
-    : []
+  const matchChecks = [
+    match.name ? StackNameCheck(match.name) : undefined,
+    ...(match.tags ? match.tags.map(tag => TagCheck(tag)) : [])
+  ]
   return reject(isNil)([UpdateCheck, StackAgeCheck(ttl), ...matchChecks])
 }
 

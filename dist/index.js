@@ -91787,9 +91787,11 @@ const getConfig = (workDir, core) => {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isValidTTL = void 0;
+exports.isValidMatchPolicy = exports.isValidTTL = void 0;
 const isValidTTL = ({ days, hours, minutes }) => !(days === undefined && hours === undefined && minutes === undefined);
 exports.isValidTTL = isValidTTL;
+const isValidMatchPolicy = ({ name, tags }) => !(name === undefined && tags === undefined);
+exports.isValidMatchPolicy = isValidMatchPolicy;
 
 
 /***/ }),
@@ -91810,12 +91812,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StackAgeCheck = void 0;
-const policies_1 = __nccwpck_require__(82150);
 const date_fns_1 = __nccwpck_require__(73314);
 const StackAgeCheck = (policy) => {
-    if (!(0, policies_1.isValidTTL)(policy)) {
-        throw new Error('Invalid TTL policy');
-    }
     return (stack) => __awaiter(void 0, void 0, void 0, function* () {
         const stackAge = stack.lastUpdate;
         const timeoutAge = (0, date_fns_1.sub)(new Date(), policy);
@@ -91954,12 +91952,10 @@ const stack_name_check_1 = __nccwpck_require__(76020);
 const tag_check_1 = __nccwpck_require__(58994);
 const update_check_1 = __nccwpck_require__(70095);
 const checksForPolicy = ({ match, ttl }) => {
-    const matchChecks = match
-        ? [
-            match.name ? (0, stack_name_check_1.StackNameCheck)(match.name) : undefined,
-            ...(match.tags ? match.tags.map(tag => (0, tag_check_1.TagCheck)(tag)) : [])
-        ]
-        : [];
+    const matchChecks = [
+        match.name ? (0, stack_name_check_1.StackNameCheck)(match.name) : undefined,
+        ...(match.tags ? match.tags.map(tag => (0, tag_check_1.TagCheck)(tag)) : [])
+    ];
     return (0, rambda_1.reject)(rambda_1.isNil)([update_check_1.UpdateCheck, (0, stack_age_check_1.StackAgeCheck)(ttl), ...matchChecks]);
 };
 const checkPolicy = (policy, stack, logger) => __awaiter(void 0, void 0, void 0, function* () {
@@ -92062,17 +92058,21 @@ const TTLPolicyParser = zod_1.z
 const TagsPolicyParser = zod_1.z
     .record(zod_1.z.string())
     .transform(arg => Object.entries(arg).map(([tag, pattern]) => ({ tag, pattern })));
-const MatchPolicy = zod_1.z.object({
+const MatchPolicy = zod_1.z
+    .object({
     name: zod_1.z
         .string()
         .transform(pattern => ({ pattern }))
         .optional(),
     tags: TagsPolicyParser.optional()
+})
+    .refine(policy => (0, policies_1.isValidMatchPolicy)(policy), {
+    message: 'Policy must match on either name or tags'
 });
 const CleanupPolicyParser = zod_1.z
     .object({
     policies: zod_1.z.record(zod_1.z.object({
-        match: MatchPolicy.optional(),
+        match: MatchPolicy,
         ttl: TTLPolicyParser
     }))
 })
