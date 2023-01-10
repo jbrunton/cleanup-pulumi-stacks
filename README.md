@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: jbrunton/cleanup-pulumi-stacks@develop
+      - uses: jbrunton/cleanup-pulumi-stacks@v1
         with:
           working-directory: pulumi
           config: |
@@ -70,7 +70,7 @@ You can specify the config in a couple of different ways:
 1. In the workflow, with the `config` key:
 
 ```yaml
-  - uses: jbrunton/cleanup-pulumi-stacks@develop
+  - uses: jbrunton/cleanup-pulumi-stacks@v1
     with:
       config: |
         policies:
@@ -82,7 +82,7 @@ You can specify the config in a couple of different ways:
 2. In a file in source control, with the `config_file` key:
 
 ```yaml
-  - uses: jbrunton/cleanup-pulumi-stacks@develop
+  - uses: jbrunton/cleanup-pulumi-stacks@v1
     with:
       config_file: cleanup-config.yml
 ```
@@ -91,7 +91,7 @@ You can specify the config in a couple of different ways:
 
 ```yaml
   # uses config file at pulumi/cleanup-config.yml
-  - uses: jbrunton/cleanup-pulumi-stacks@develop
+  - uses: jbrunton/cleanup-pulumi-stacks@v1
     with:
       working-directory: pulumi
 ```
