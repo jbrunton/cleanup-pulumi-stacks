@@ -1,6 +1,9 @@
 name: 'Cleanup Pulumi Stacks'
 description: 'Automatically cleanup development/preview stacks in a Pulumi project'
 author: 'John Brunton'
+branding:
+  icon: trash-2
+  color: green
 inputs:
   working-directory:
     description: Working directory of your Pulumi project
