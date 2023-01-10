@@ -7,6 +7,7 @@ const options = {
       {
         releaseRules: [
           { type: "breaking", release: "major" },
+          { type: "major", release: "major" },
           { type: "feat", release: "minor" },
           { type: "perf", release: "minor" },
           { type: "build", release: "patch" },
