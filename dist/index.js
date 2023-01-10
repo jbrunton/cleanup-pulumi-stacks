@@ -91781,6 +91781,19 @@ const getConfig = (workDir, core) => {
 
 /***/ }),
 
+/***/ 82150:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.isValidTTL = void 0;
+const isValidTTL = ({ days, hours, minutes }) => !(days === undefined && hours === undefined && minutes === undefined);
+exports.isValidTTL = isValidTTL;
+
+
+/***/ }),
+
 /***/ 82846:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -91797,8 +91810,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StackAgeCheck = void 0;
+const policies_1 = __nccwpck_require__(82150);
 const date_fns_1 = __nccwpck_require__(73314);
 const StackAgeCheck = (policy) => {
+    if (!(0, policies_1.isValidTTL)(policy)) {
+        throw new Error('Invalid TTL policy');
+    }
     return (stack) => __awaiter(void 0, void 0, void 0, function* () {
         const stackAge = stack.lastUpdate;
         const timeoutAge = (0, date_fns_1.sub)(new Date(), policy);
@@ -91837,8 +91854,8 @@ exports.StackNameCheck = void 0;
 const micromatch_1 = __importDefault(__nccwpck_require__(76228));
 const StackNameCheck = (policy) => {
     return (stack) => __awaiter(void 0, void 0, void 0, function* () {
-        const isLegacy = micromatch_1.default.isMatch(stack.name, policy.patterns);
-        const description = `checked name [${stack.name}] against patterns [${policy.patterns}]`;
+        const isLegacy = micromatch_1.default.isMatch(stack.name, policy.pattern);
+        const description = `checked name [${stack.name}] against pattern [${policy.pattern}]`;
         return {
             isLegacy,
             description
@@ -91873,8 +91890,8 @@ const micromatch_1 = __importDefault(__nccwpck_require__(76228));
 const TagCheck = (policy) => {
     return (stack) => __awaiter(void 0, void 0, void 0, function* () {
         const value = yield stack.getTag(policy.tag);
-        const isLegacy = value ? micromatch_1.default.isMatch(value, policy.patterns) : false;
-        const description = `checked tag [${policy.tag}=${value}] against patterns [${policy.patterns}]`;
+        const isLegacy = value ? micromatch_1.default.isMatch(value, policy.pattern) : false;
+        const description = `checked tag [${policy.tag}=${value}] against pattern [${policy.pattern}]`;
         return {
             isLegacy,
             description
@@ -92027,28 +92044,26 @@ exports.cleanupLegacyStacks = cleanupLegacyStacks;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parsePolicies = void 0;
+const policies_1 = __nccwpck_require__(82150);
 const yaml_1 = __nccwpck_require__(65065);
-const rambda_1 = __nccwpck_require__(30674);
 const zod_1 = __nccwpck_require__(63301);
-const TTLPolicyParser = zod_1.z.object({
+const TTLPolicyParser = zod_1.z
+    .object({
+    days: zod_1.z.number().optional(),
     hours: zod_1.z.number().optional(),
     minutes: zod_1.z.number().optional()
-});
-const PatternsParser = zod_1.z.string().transform((arg, ctx) => {
-    const patterns = (0, rambda_1.split)(',', arg);
-    if (!patterns.length) {
-        ctx.addIssue({
-            code: zod_1.z.ZodIssueCode.custom,
-            message: 'Missing patterns'
-        });
-    }
-    return patterns;
+})
+    .refine(val => (0, policies_1.isValidTTL)(val), {
+    message: 'At least one of days, hours or minutes must be set'
 });
 const TagsPolicyParser = zod_1.z
-    .record(PatternsParser)
-    .transform(arg => Object.entries(arg).map(([tag, patterns]) => ({ tag, patterns })));
+    .record(zod_1.z.string())
+    .transform(arg => Object.entries(arg).map(([tag, pattern]) => ({ tag, pattern })));
 const MatchPolicy = zod_1.z.object({
-    name: PatternsParser.transform(patterns => ({ patterns })).optional(),
+    name: zod_1.z
+        .string()
+        .transform(pattern => ({ pattern }))
+        .optional(),
     tags: TagsPolicyParser.optional()
 });
 const CleanupPolicyParser = zod_1.z

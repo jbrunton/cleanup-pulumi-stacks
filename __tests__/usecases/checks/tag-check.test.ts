@@ -5,7 +5,7 @@ import {TagPolicy} from '@entities/policies'
 describe('TagCheck', () => {
   const policy: TagPolicy = {
     tag: 'environment',
-    patterns: ['dev*', 'staging']
+    pattern: '(dev*|staging)'
   }
 
   const check = TagCheck(policy)
@@ -21,7 +21,7 @@ describe('TagCheck', () => {
     expect(result).toEqual({
       isLegacy: true,
       description:
-        'checked tag [environment=staging] against patterns [dev*,staging]'
+        'checked tag [environment=staging] against pattern [(dev*|staging)]'
     })
   })
 
@@ -30,7 +30,7 @@ describe('TagCheck', () => {
     expect(result).toEqual({
       isLegacy: true,
       description:
-        'checked tag [environment=dev-1] against patterns [dev*,staging]'
+        'checked tag [environment=dev-1] against pattern [(dev*|staging)]'
     })
   })
 
@@ -39,14 +39,14 @@ describe('TagCheck', () => {
     expect(result).toEqual({
       isLegacy: false,
       description:
-        'checked tag [environment=production] against patterns [dev*,staging]'
+        'checked tag [environment=production] against pattern [(dev*|staging)]'
     })
   })
 
   it('fails when the tag is not present', async () => {
     const policy: TagPolicy = {
       tag: 'service',
-      patterns: ['api']
+      pattern: 'api'
     }
     const check = TagCheck(policy)
 
@@ -54,7 +54,7 @@ describe('TagCheck', () => {
 
     expect(result).toEqual({
       isLegacy: false,
-      description: 'checked tag [service=null] against patterns [api]'
+      description: 'checked tag [service=null] against pattern [api]'
     })
   })
 })

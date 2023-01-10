@@ -1,32 +1,28 @@
-import {PolicyParser} from '@entities/policies'
+import {PolicyParser, isValidTTL} from '@entities/policies'
 import {parse} from 'yaml'
-import {split} from 'rambda'
 import {z} from 'zod'
 
-const TTLPolicyParser = z.object({
-  hours: z.number().optional(),
-  minutes: z.number().optional()
-})
-
-const PatternsParser = z.string().transform((arg, ctx) => {
-  const patterns = split(',', arg)
-  if (!patterns.length) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Missing patterns'
-    })
-  }
-  return patterns
-})
+const TTLPolicyParser = z
+  .object({
+    days: z.number().optional(),
+    hours: z.number().optional(),
+    minutes: z.number().optional()
+  })
+  .refine(val => isValidTTL(val), {
+    message: 'At least one of days, hours or minutes must be set'
+  })
 
 const TagsPolicyParser = z
-  .record(PatternsParser)
+  .record(z.string())
   .transform(arg =>
-    Object.entries(arg).map(([tag, patterns]) => ({tag, patterns}))
+    Object.entries(arg).map(([tag, pattern]) => ({tag, pattern}))
   )
 
 const MatchPolicy = z.object({
-  name: PatternsParser.transform(patterns => ({patterns})).optional(),
+  name: z
+    .string()
+    .transform(pattern => ({pattern}))
+    .optional(),
   tags: TagsPolicyParser.optional()
 })
 
