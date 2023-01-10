@@ -120,21 +120,21 @@ policies:
   # match glob (any stacks starting with `dev-`)
   cleanup-dev:
     match:
-      name: dev-*
+      name: 'dev-*'
     ttl:
       hours: 24
 
   # match logical 'or' of patterns (any stack named `test` or starting with `dev-`)
   cleanup-all:
     match:
-      name: (test|dev-*)
+      name: '(test|dev-*)'
     ttl:
       hours: 24
 
   # match negations
   cleanup-all:
     match:
-      name: !production
+      name: '!production'
     ttl:
       hours: 24
 ```
@@ -158,7 +158,7 @@ policies:
   cleanup-dev:
     match:
       tags:
-        env: dev-*
+        env: 'dev-*'
     ttl:
       hours: 24
 
@@ -166,7 +166,7 @@ policies:
   cleanup-all:
     match:
       tags:
-        env: test|dev-*
+        env: '(test|dev-*)'
     ttl:
       hours: 24
 ```
