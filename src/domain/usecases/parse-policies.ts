@@ -42,6 +42,9 @@ const CleanupPolicyParser = z
   .transform(arg =>
     Object.entries(arg.policies).map(([name, policy]) => ({name, ...policy}))
   )
+  .refine(policies => policies.length > 0, {
+    message: 'At least one policy must be defined'
+  })
 
 export const parsePolicies: PolicyParser = input => {
   const data = parse(input)

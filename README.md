@@ -199,5 +199,5 @@ It goes without saying that you should be careful using any automated tool which
 ### Steps this action takes
 
 1. By default the action runs in preview mode, and won't destroy anything. You can view its runs and decide when to disable preview mode.
-2. You have to specify at least one `match` policy, so you can't accidentally add a "remove all" policy.
+2. You have to specify at least one `match` policy, so you can't accidentally add a "remove all" policy. You must also define at least one `stack` policy to match on.
 3. Test coverage of key application logic is intentionally high, and checked using a mutation testing tool.

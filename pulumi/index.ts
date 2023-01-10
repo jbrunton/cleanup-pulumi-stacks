@@ -8,13 +8,10 @@ const bucket = new aws.s3.Bucket('my-bucket')
 // Export the name of the bucket
 export const bucketName = bucket.id
 
-new pulumiservice.StackTag(
-  'stack-tags',
-  {
-    organization: pulumi.getOrganization(),
-    project: pulumi.getProject(),
-    stack: pulumi.getStack(),
-    name: 'environment',
-    value: process.env.ENVIRONMENT_TAG
-  }
-)
+new pulumiservice.StackTag('stack-tags', {
+  organization: pulumi.getOrganization(),
+  project: pulumi.getProject(),
+  stack: pulumi.getStack(),
+  name: 'environment',
+  value: process.env.ENVIRONMENT_TAG
+})

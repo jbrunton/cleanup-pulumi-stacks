@@ -92076,7 +92076,10 @@ const CleanupPolicyParser = zod_1.z
         ttl: TTLPolicyParser
     }))
 })
-    .transform(arg => Object.entries(arg.policies).map(([name, policy]) => (Object.assign({ name }, policy))));
+    .transform(arg => Object.entries(arg.policies).map(([name, policy]) => (Object.assign({ name }, policy))))
+    .refine(policies => policies.length > 0, {
+    message: 'At least one policy must be defined'
+});
 const parsePolicies = input => {
     const data = (0, yaml_1.parse)(input);
     return CleanupPolicyParser.parse(data);
