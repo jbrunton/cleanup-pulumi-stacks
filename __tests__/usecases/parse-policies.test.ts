@@ -39,6 +39,29 @@ describe('parsePolicies', () => {
   })
 
   describe('validation', () => {
+    it('requires at least one policy', () => {
+      expect(() => parsePolicies('')).toThrowError(
+        new z.ZodError([
+          {
+            code: 'invalid_type',
+            expected: 'object',
+            received: 'null',
+            path: [],
+            message: 'Expected object, received null'
+          }
+        ])
+      )
+      expect(() => parsePolicies('policies: {}')).toThrowError(
+        new z.ZodError([
+          {
+            code: 'custom',
+            message: 'At least one policy must be defined',
+            path: []
+          }
+        ])
+      )
+    })
+
     it('requires a TTL policy', () => {
       const yaml = `
       policies:
@@ -75,6 +98,11 @@ describe('parsePolicies', () => {
             code: 'custom',
             message: 'At least one of days, hours or minutes must be set',
             path: ['policies', 'invalid-ttl', 'ttl']
+          },
+          {
+            code: 'custom',
+            message: 'At least one policy must be defined',
+            path: []
           }
         ])
       )
@@ -114,6 +142,11 @@ describe('parsePolicies', () => {
             code: 'custom',
             message: 'Policy must match on either name or tags',
             path: ['policies', 'invalid-match', 'match']
+          },
+          {
+            code: 'custom',
+            message: 'At least one policy must be defined',
+            path: []
           }
         ])
       )
