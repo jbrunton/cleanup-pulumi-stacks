@@ -9,13 +9,15 @@ import {StackPolicy} from '@entities/policies'
 import {TagCheck} from './checks/tag-check'
 import {UpdateCheck} from './checks/update-check'
 
-const checksForPolicy = (policy: StackPolicy): Check[] =>
-  reject(isNil)([
-    UpdateCheck,
-    StackAgeCheck(policy.ttl),
-    policy.match.name ? StackNameCheck(policy.match.name) : undefined,
-    ...(policy.match.tags ? policy.match.tags.map(tag => TagCheck(tag)) : [])
-  ])
+const checksForPolicy = ({match, ttl}: StackPolicy): Check[] => {
+  const matchChecks = match
+    ? [
+        match.name ? StackNameCheck(match.name) : undefined,
+        ...(match.tags ? match.tags.map(tag => TagCheck(tag)) : [])
+      ]
+    : []
+  return reject(isNil)([UpdateCheck, StackAgeCheck(ttl), ...matchChecks])
+}
 
 const checkPolicy = async (
   policy: StackPolicy,
