@@ -13,5 +13,9 @@ export const createLogger = ({
   info: preview
     ? (message: string) => core.info(`[PREVIEW] ${message}`)
     : core.info,
-  log: verbose ? core.info : () => {}
+  log: verbose
+    ? core.info
+    : () => {
+        // silent unless verbose=true
+      }
 })

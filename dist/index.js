@@ -91590,7 +91590,11 @@ const createLogger = ({ preview, verbose }) => ({
     info: preview
         ? (message) => core.info(`[PREVIEW] ${message}`)
         : core.info,
-    log: verbose ? core.info : () => { }
+    log: verbose
+        ? core.info
+        : () => {
+            // silent unless verbose=true
+        }
 });
 exports.createLogger = createLogger;
 
