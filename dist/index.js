@@ -91953,12 +91953,15 @@ const stack_age_check_1 = __nccwpck_require__(82846);
 const stack_name_check_1 = __nccwpck_require__(76020);
 const tag_check_1 = __nccwpck_require__(58994);
 const update_check_1 = __nccwpck_require__(70095);
-const checksForPolicy = (policy) => (0, rambda_1.reject)(rambda_1.isNil)([
-    update_check_1.UpdateCheck,
-    (0, stack_age_check_1.StackAgeCheck)(policy.ttl),
-    policy.match.name ? (0, stack_name_check_1.StackNameCheck)(policy.match.name) : undefined,
-    ...(policy.match.tags ? policy.match.tags.map(tag => (0, tag_check_1.TagCheck)(tag)) : [])
-]);
+const checksForPolicy = ({ match, ttl }) => {
+    const matchChecks = match
+        ? [
+            match.name ? (0, stack_name_check_1.StackNameCheck)(match.name) : undefined,
+            ...(match.tags ? match.tags.map(tag => (0, tag_check_1.TagCheck)(tag)) : [])
+        ]
+        : [];
+    return (0, rambda_1.reject)(rambda_1.isNil)([update_check_1.UpdateCheck, (0, stack_age_check_1.StackAgeCheck)(ttl), ...matchChecks]);
+};
 const checkPolicy = (policy, stack, logger) => __awaiter(void 0, void 0, void 0, function* () {
     const checks = checksForPolicy(policy);
     for (const check of checks) {
@@ -92069,7 +92072,7 @@ const MatchPolicy = zod_1.z.object({
 const CleanupPolicyParser = zod_1.z
     .object({
     policies: zod_1.z.record(zod_1.z.object({
-        match: MatchPolicy,
+        match: MatchPolicy.optional(),
         ttl: TTLPolicyParser
     }))
 })

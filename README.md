@@ -83,7 +83,7 @@ You can specify the config in a couple of different ways:
 
 ## Policies
 
-Cleanup policies are listed under the `policies` key in the config. They must be given a `ttl` (time-to-live), and can be configured to match on either stack names, tags or both.
+Cleanup policies are listed under the `policies` key in the config. They must be given a `ttl` (time-to-live), and can also be configured to match on stack names, tags or both.
 
 ### TTL Policy
 

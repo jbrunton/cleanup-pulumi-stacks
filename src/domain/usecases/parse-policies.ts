@@ -30,7 +30,7 @@ const CleanupPolicyParser = z
   .object({
     policies: z.record(
       z.object({
-        match: MatchPolicy,
+        match: MatchPolicy.optional(),
         ttl: TTLPolicyParser
       })
     )

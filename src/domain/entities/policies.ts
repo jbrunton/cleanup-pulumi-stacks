@@ -18,7 +18,7 @@ export type StackNamePolicy = {
 
 export type StackPolicy = {
   name: string
-  match: {
+  match?: {
     name?: StackNamePolicy
     tags?: TagPolicy[]
   }
