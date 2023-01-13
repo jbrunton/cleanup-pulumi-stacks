@@ -60,7 +60,7 @@ jobs:
 * `working-directory` - Relative path in the repo to the Pulumi project (i.e. the project with your `Pulumi.yaml` file). Defaults to the current working directory.
 * `config` - Yaml config for policies (see below).
 * `config_file` - Can be used to specify a path to a config file in place of the `config` input.
-* `preview` - When `true`, logs a preview of what the action would do without making changes to any stacks. Defaults to `false`.
+* `preview` - When `true`, logs a preview of what the action would do without making changes to any stacks. Defaults to `true`.
 * `verbose` - When `true`, provides detailed output on all the policy checks applied to each stack. Defaults to `false`.
 
 ## Config
