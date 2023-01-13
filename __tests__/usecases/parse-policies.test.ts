@@ -5,7 +5,7 @@ describe('parsePolicies', () => {
   it('parses valid yaml', () => {
     const yaml = `
       policies:
-        clean-staging:
+        clean-dev:
           match:
             tags:
               environment: 'dev*'
@@ -20,7 +20,7 @@ describe('parsePolicies', () => {
     const policy = parsePolicies(yaml)
     expect(policy).toEqual([
       {
-        name: 'clean-staging',
+        name: 'clean-dev',
         match: {
           tags: [{pattern: 'dev*', tag: 'environment'}]
         },
@@ -138,6 +138,37 @@ describe('parsePolicies', () => {
       `
       expect(() => parsePolicies(yaml)).toThrowError(
         new z.ZodError([
+          {
+            code: 'custom',
+            message: 'Policy must match on either name or tags',
+            path: ['policies', 'invalid-match', 'match']
+          },
+          {
+            code: 'custom',
+            message: 'At least one policy must be defined',
+            path: []
+          }
+        ])
+      )
+    })
+
+    it('requires a valid tags policy', () => {
+      const yaml = `
+      policies:
+        invalid-match:
+          ttl:
+            hours: 3
+          match: {
+            tags: {}
+          }
+      `
+      expect(() => parsePolicies(yaml)).toThrowError(
+        new z.ZodError([
+          {
+            code: 'custom',
+            message: 'Policy must match on at least one tag',
+            path: ['policies', 'invalid-match', 'match', 'tags']
+          },
           {
             code: 'custom',
             message: 'Policy must match on either name or tags',
