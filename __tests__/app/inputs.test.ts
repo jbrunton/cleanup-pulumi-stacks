@@ -1,5 +1,4 @@
 import {ActionsCore, getInputs} from '@app/inputs'
-import {pick} from 'rambda'
 
 jest.mock('@actions/core')
 
