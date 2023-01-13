@@ -1,6 +1,6 @@
 # Cleanup Pulumi Stacks
 
-[![build](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml/badge.svg)](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml)
+[![build](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml/badge.svg?query=branch%3Adevelop)](https://github.com/jbrunton/cleanup-pulumi-stacks/actions/workflows/build.yml?query=branch%3Adevelop)
 [![Mutation coverage](https://img.shields.io/endpoint?style=flat&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fjbrunton%2Fcleanup-pulumi-stacks%2Fdevelop)](https://dashboard.stryker-mutator.io/reports/github.com/jbrunton/cleanup-pulumi-stacks/develop)
 
 A GitHub Action to automatically cleanup development/preview stacks in a Pulumi project.
