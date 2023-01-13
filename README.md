@@ -42,6 +42,8 @@ jobs:
       - uses: jbrunton/cleanup-pulumi-stacks@v1
         with:
           working-directory: pulumi
+          # uncomment to disable previews when you're confident in your policies
+          # preview: false
           config: |
             policies:
               cleanup-dev-stacks:
