@@ -35,6 +35,16 @@ describe('StackAgeCheck', () => {
     })
   })
 
+  it('passes when the stack is exactly the age of the ttl policy', async () => {
+    const threeHoursAgo = sub(now, {hours: 3, minutes: 30})
+    const result = await check(stack(threeHoursAgo))
+    expect(result).toEqual({
+      isLegacy: false,
+      description:
+        'checked stack age [2021-01-01T08:30:00.000Z] against ttl [3 hours 30 minutes]'
+    })
+  })
+
   it('fails when the stack is older than the ttl policy', async () => {
     const fourHoursAgo = sub(now, {hours: 4})
     const result = await check(stack(fourHoursAgo))

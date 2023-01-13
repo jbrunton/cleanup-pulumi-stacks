@@ -17,6 +17,9 @@ const TagsPolicyParser = z
   .transform(arg =>
     Object.entries(arg).map(([tag, pattern]) => ({tag, pattern}))
   )
+  .refine(policies => policies.length > 0, {
+    message: 'Policy must match on at least one tag'
+  })
 
 const MatchPolicy = z
   .object({

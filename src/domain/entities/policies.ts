@@ -28,6 +28,6 @@ export type StackPolicy = {
 }
 
 export const isValidMatchPolicy = ({name, tags}: MatchPolicy): boolean =>
-  !(name === undefined && tags === undefined)
+  name !== undefined || (tags !== undefined && tags.length > 0)
 
 export type PolicyParser = (input: string) => StackPolicy[]

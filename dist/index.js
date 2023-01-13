@@ -91794,7 +91794,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isValidMatchPolicy = exports.isValidTTL = void 0;
 const isValidTTL = ({ days, hours, minutes }) => !(days === undefined && hours === undefined && minutes === undefined);
 exports.isValidTTL = isValidTTL;
-const isValidMatchPolicy = ({ name, tags }) => !(name === undefined && tags === undefined);
+const isValidMatchPolicy = ({ name, tags }) => name !== undefined || (tags !== undefined && tags.length > 0);
 exports.isValidMatchPolicy = isValidMatchPolicy;
 
 
@@ -92061,7 +92061,10 @@ const TTLPolicyParser = zod_1.z
 });
 const TagsPolicyParser = zod_1.z
     .record(zod_1.z.string())
-    .transform(arg => Object.entries(arg).map(([tag, pattern]) => ({ tag, pattern })));
+    .transform(arg => Object.entries(arg).map(([tag, pattern]) => ({ tag, pattern })))
+    .refine(policies => policies.length > 0, {
+    message: 'Policy must match on at least one tag'
+});
 const MatchPolicy = zod_1.z
     .object({
     name: zod_1.z
