@@ -5,7 +5,7 @@
   "branchPrefix": "deps-",
   "branchNameStrict": true,
   "branchConcurrentLimit": 2,
-  "schedule": "every weekend",
+  "schedule": "before 3am on the first day of the month",
   "packageRules": [
     {
       "matchPackagePatterns": [
