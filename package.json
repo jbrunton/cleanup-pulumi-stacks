@@ -19,6 +19,9 @@
     "type": "git",
     "url": "git+https://github.com/jbrunton/cleanup-pulumi-stacks.git"
   },
+  "engines": {
+    "node": ">= 20.0.0 <21.0.0"
+  },
   "keywords": [
     "actions",
     "node",
