@@ -8,6 +8,6 @@
         "@pulumi/aws": "^5.0.0",
         "@pulumi/awsx": "^1.0.0",
         "@pulumi/pulumi": "^3.0.0",
-        "@pulumi/pulumiservice": "^0.1.8"
+        "@pulumi/pulumiservice": "^0.26.0"
     }
 }
